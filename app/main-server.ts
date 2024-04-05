@@ -1,1 +1,4 @@
-console.log("Hello World");
+import { connectToDatabase, connectToRedis } from "./connections/index.ts";
+
+await connectToDatabase();
+await connectToRedis();
