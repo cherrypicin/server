@@ -1,5 +1,5 @@
 import { load } from "dotenv";
-import { logError } from "./log-error.ts";
+import { logError } from "@utils";
 
 const env = await load();
 

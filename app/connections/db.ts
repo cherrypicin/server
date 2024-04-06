@@ -16,7 +16,6 @@ export const connectToDatabase = withTryCatch(async () => {
 		db = client.db(env["DB_NAME"]);
 
 		console.log("Connected to database");
-		throw new Error("Failed to connect to database");
 	}
 	return db;
 }, "connection error - Failed to connect to database");
