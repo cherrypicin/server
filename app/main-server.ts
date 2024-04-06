@@ -1,6 +1,6 @@
 import { connectToDatabase, connectToRedis } from "./connections/index.ts";
 import { Application, Context } from "oak";
-import { logNetwork } from "@utils";
+import { corsMiddleware, logNetwork } from "@utils";
 
 await connectToDatabase();
 await connectToRedis();
@@ -8,6 +8,7 @@ await connectToRedis();
 const app = new Application();
 
 app.use(logNetwork);
+app.use(corsMiddleware);
 
 app.use(async (ctx: Context) => {
 	ctx.response.body = "Hello world!";
