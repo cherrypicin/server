@@ -22,16 +22,14 @@ export const logNetwork: Middleware = async (ctx, next) => {
 		}`
 	);
 
-	const contentType = ctx.request.headers.get("content-type");
+	const contentType = ctx.request.headers.get("Content-Type");
 
 	if (contentType && contentType.includes("application/json")) {
 		console.log("Content-Type: application/json");
-		try {
-			const requestBody = ctx.request.body;
+		if (ctx.request.hasBody) {
+			const requestBody = await ctx.request.body.json();
 
 			console.log(`Request body: ${JSON.stringify(requestBody, null, 2)}`);
-		} catch (err) {
-			console.log(`Error reading request body: ${err.message}`);
 		}
 	}
 

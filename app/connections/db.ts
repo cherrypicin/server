@@ -1,5 +1,6 @@
 import { MongoClient } from "mongodb";
 import { load } from "dotenv";
+
 import { withTryCatch } from "@utils";
 
 const env = await load();

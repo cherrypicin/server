@@ -1,4 +1,5 @@
 import { load } from "dotenv";
+
 const env = await load();
 
 export async function logError({

@@ -8,6 +8,7 @@
       "npm:ajv-formats": "npm:ajv-formats@3.0.1_ajv@8.12.0",
       "npm:mongodb": "npm:mongodb@4.12.1",
       "npm:mongodb@5.9.2": "npm:mongodb@5.9.2",
+      "npm:redis-om@0.4.3": "npm:redis-om@0.4.3",
       "npm:redis@4.6.13": "npm:redis@4.6.13_@redis+client@1.5.14"
     },
     "npm": {
@@ -803,6 +804,14 @@
         "integrity": "sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==",
         "dependencies": {}
       },
+      "jsonpath-plus@7.2.0": {
+        "integrity": "sha512-zBfiUPM5nD0YZSBT/o/fbCUlCcepMIdP0CJZxM1+KgA4f2T206f6VAg9e7mX35+KlMaIc5qXW34f3BnwJ3w+RA==",
+        "dependencies": {}
+      },
+      "just-clone@6.2.0": {
+        "integrity": "sha512-1IynUYEc/HAwxhi3WDpIpxJbZpMCvvrrmZVqvj9EhpvbH8lls7HhdhiByjL7DkAaWlLIzpC0Xc/VPvy/UxLNjA==",
+        "dependencies": {}
+      },
       "memory-pager@1.5.0": {
         "integrity": "sha512-ZS4Bp4r/Zoeq6+NLJpP+0Zzm0pR8whtGPf1XExKLJBAczGMnSi3It14OiNCStjQjM6NU1okjQGSxgEZN8eBYKg==",
         "dependencies": {}
@@ -836,6 +845,15 @@
       "punycode@2.3.1": {
         "integrity": "sha512-vYt7UD1U9Wg6138shLtLOvdAu+8DsC/ilFtEVHcH+wydcSpNE20AfSOduf6MkRFahL5FY7X1oU7nKVZFtfq8Fg==",
         "dependencies": {}
+      },
+      "redis-om@0.4.3": {
+        "integrity": "sha512-OQ2ydJYm8j5YMWj3K2ieQdUcfu2gP1nW2XsdaFLbHkaSlYqj1Kfu8X+T44vPuesY3cKdVj6tv9bHEmI9oqwHgA==",
+        "dependencies": {
+          "jsonpath-plus": "jsonpath-plus@7.2.0",
+          "just-clone": "just-clone@6.2.0",
+          "redis": "redis@4.6.13_@redis+client@1.5.14",
+          "ulid": "ulid@2.3.0"
+        }
       },
       "redis@4.6.13_@redis+client@1.5.14": {
         "integrity": "sha512-MHgkS4B+sPjCXpf+HfdetBwbRz6vCtsceTmw1pHNYJAsYxrfpOP6dz+piJWGos8wqG7qb3vj/Rrc5qOlmInUuA==",
@@ -891,6 +909,10 @@
       },
       "tslib@2.6.1": {
         "integrity": "sha512-t0hLfiEKfMUoqhG+U1oid7Pva4bbDPHYfJNiB7BiIjRkj1pyC++4N3huJfqY6aRH6VTB0rvtzQwjM4K6qpfOig==",
+        "dependencies": {}
+      },
+      "ulid@2.3.0": {
+        "integrity": "sha512-keqHubrlpvT6G2wH0OEfSW4mquYRcbe/J8NMmveoQOjUqmo+hXtO+ORCpWhdbZ7k72UtY61BL7haGxW6enBnjw==",
         "dependencies": {}
       },
       "uri-js@4.4.1": {

@@ -6,6 +6,9 @@
 		"oak-cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
 		"colors": "https://deno.land/std@0.114.0/fmt/colors.ts",
 		"typebox": "npm:@sinclair/typebox",
-		"@utils": "./app/utils/index.ts"
+		"@utils": "./app/utils/index.ts",
+		"@schemas": "./app/schemas/index.ts",
+		"@connections": "./app/connections/index.ts",
+		"@routes": "./app/routes/index.ts"
 	}
 }

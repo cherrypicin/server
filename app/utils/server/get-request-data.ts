@@ -1,6 +1,6 @@
 import { RouteParams, RouterContext, Request } from "oak";
 
-export interface HttpRequestData {
+export interface RequestData {
 	appSource: string;
 	body: any;
 	contentType: string | null;
@@ -29,9 +29,9 @@ const parseCookies = (header: string | null) => {
 	return cookies;
 };
 
-const getRequestData = <T extends string>(
+const getRequestData = async <T extends string>(
 	context: RouterContext<T, RouteParams<T>>
-): HttpRequestData => {
+): Promise<RequestData> => {
 	const { request } = context;
 
 	const { headers, method, url } = request;
@@ -41,10 +41,14 @@ const getRequestData = <T extends string>(
 	const appSource = headers.get("x-app-source");
 	const authorization = headers.get("authorization");
 	const userAgent = headers.get("user-agent");
+	const cookies = parseCookies(headers.get("Cookie"));
+
 	const searchParams = new URLSearchParams(search);
 	const ip = request.ip;
-	const body = request.body;
-	const cookies = parseCookies(headers.get("Cookie"));
+	let body = null;
+	if (request.hasBody) {
+		body = await request.body.json();
+	}
 
 	const searchParamsObject = {};
 	for (const [key, value] of searchParams) {
@@ -68,7 +72,7 @@ const getRequestData = <T extends string>(
 		userAgent,
 	};
 
-	return Object.freeze(requestData) as HttpRequestData;
+	return Object.freeze(requestData) as RequestData;
 };
 
 export { getRequestData };

@@ -1,7 +1,8 @@
-import { connectToDatabase, connectToRedis } from "./connections/index.ts";
 import { Application, Router } from "oak";
+
+import { connectToDatabase, connectToRedis } from "@connections";
 import { corsMiddleware, logNetwork } from "@utils";
-import { registerRoutes, routes } from "./routes/index.ts";
+import { registerRoutes, routes } from "@routes";
 
 await connectToDatabase();
 await connectToRedis();

@@ -1,5 +1,6 @@
 import { createClient } from "npm:redis@4.6.13";
 import { load } from "dotenv";
+
 import { withTryCatch } from "../utils/server/with-try-catch.ts";
 
 const env = await load();
@@ -23,8 +24,6 @@ export const connectToRedis = withTryCatch(async () => {
 			port: REDIS_PORT,
 		},
 	});
-
-	console.log("Connected to Redis");
 
 	redisClient = client;
 	return client;
