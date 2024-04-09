@@ -11,7 +11,7 @@ const syncDBSchema = new Schema("SyncDB", {
 	collection: { type: "string" },
 	operation: { type: "string" },
 	userId: { type: "string" },
-	updatedAt: { type: "date" },
+	updatedAt: { type: "date", sortable: true },
 	syncId: { type: "number" },
 });
 
