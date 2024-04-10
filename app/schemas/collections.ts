@@ -25,12 +25,12 @@ const ConfigSchema = Type.Object({
 });
 
 export const CollectionSchema = Type.Object({
-	_id: Type.Optional(Type.String()),
+	_id: Type.String(),
 	banner: Type.Optional(Type.String()),
 	bannerStyle: Type.Optional(Type.String()),
 	color: Type.Optional(Type.String({ maxLength: 10 })),
 	config: Type.Optional(ConfigSchema),
-	createdAt: Type.Optional(Type.String({ format: "date-time" })),
+	createdAt: Type.String({ format: "date-time" }),
 	description: Type.Optional(Type.String({ maxLength: 150 })),
 	forkedBy: Type.Optional(Type.Array(UserId)),
 	icon: Type.Optional(Type.String()),
@@ -40,14 +40,14 @@ export const CollectionSchema = Type.Object({
 	isFavorite: Type.Optional(Type.Boolean()),
 	isHidden: Type.Optional(Type.Boolean()),
 	isProtected: Type.Optional(Type.Boolean()),
-	name: Type.Optional(Type.String({ maxLength: 50 })),
-	parent: Type.Optional(Type.String()),
+	name: Type.String({ maxLength: 50 }),
+	parent: Type.String(),
 	password: Type.Optional(Type.String()),
 	pinned: Type.Optional(Type.Array(BookmarkId)),
 	previousParent: Type.Optional(Type.String()),
 	sharedWith: Type.Optional(Type.Array(SharedWithSchema)),
 	updatedAt: Type.Optional(Type.String({ format: "date-time" })),
-	userId: Type.Optional(UserId),
+	userId: UserId,
 });
 
 export const UpdateCollectionSchema = Type.Partial(CollectionSchema);

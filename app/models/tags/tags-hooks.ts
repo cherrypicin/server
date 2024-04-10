@@ -1,17 +1,14 @@
 import { handleRedisDBOperation, stepLogger } from "@utils";
 
-export type hooksParams = {
-	data: any;
-	_ids?: string[];
-};
+import { HooksParams } from "../types.ts";
 
-export const preTagCreate = async ({ data }: hooksParams) => {
+export const preTagCreate = async ({ data }: HooksParams) => {
 	stepLogger({ step: "preTagCreate", params: { data } });
 };
-export const preTagUpdate = async ({ data }: hooksParams) => {};
-export const preTagDelete = async ({ data }: hooksParams) => {};
+export const preTagUpdate = async ({ data }: HooksParams) => {};
+export const preTagDelete = async ({ data }: HooksParams) => {};
 
-export const postTagCreate = async ({ data }: hooksParams) => {
+export const postTagCreate = async ({ data }: HooksParams) => {
 	stepLogger({ step: "postTagCreate", params: { data } });
 
 	await handleRedisDBOperation({
@@ -21,7 +18,7 @@ export const postTagCreate = async ({ data }: hooksParams) => {
 	});
 };
 
-export const postTagUpdate = async ({ data, _ids }: hooksParams) => {
+export const postTagUpdate = async ({ data, _ids }: HooksParams) => {
 	stepLogger({ step: "postTagUpdate", params: { data, _ids } });
 
 	await handleRedisDBOperation({
@@ -32,7 +29,7 @@ export const postTagUpdate = async ({ data, _ids }: hooksParams) => {
 	});
 };
 
-export const postTagDelete = async ({ data, _ids }: hooksParams) => {
+export const postTagDelete = async ({ data, _ids }: HooksParams) => {
 	stepLogger({ step: "postTagDelete", params: { data, _ids } });
 
 	await handleRedisDBOperation({

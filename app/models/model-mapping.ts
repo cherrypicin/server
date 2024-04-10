@@ -1,5 +1,7 @@
-import * as tagModel from "./tags/index.ts";
+import { tagsModel } from "./tags/tags-model.ts";
+import { collectionsModel } from "./collections/collections-model.ts";
 
 export const modelMapping = {
-	tags: tagModel.tagsModel,
+	tags: tagsModel,
+	collections: collectionsModel,
 };
