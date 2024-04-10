@@ -4,8 +4,8 @@ import { connectToDatabase, connectToRedis } from "@connections";
 import { corsMiddleware, logNetwork } from "@utils";
 import { registerRoutes, routes } from "@routes";
 
-await connectToDatabase();
 await connectToRedis();
+await connectToDatabase();
 
 const app = new Application();
 const router = new Router();

@@ -8,6 +8,7 @@
 		"redis-om": "npm:redis-om@0.4.3",
 		"typebox": "npm:@sinclair/typebox",
 		"@connections": "./app/connections/index.ts",
+		"@models": "./app/models/index.ts",
 		"@routes": "./app/routes/index.ts",
 		"@schemas": "./app/schemas/index.ts",
 		"@utils": "./app/utils/index.ts"

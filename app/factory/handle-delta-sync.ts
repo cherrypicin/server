@@ -22,7 +22,7 @@ export const handleDeltaSync = async ({
 		const entities = await syncDBRepository
 			.search()
 			.where("userId")
-			.eq(1234)
+			.eq(12347)
 			.where("syncId")
 			.between(fromSyncId, toSyncId)
 			.sortBy("updatedAt", "ASC")

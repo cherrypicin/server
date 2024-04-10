@@ -1,7 +1,7 @@
 //@ts-nocheck
 import { Context } from "oak";
 
-import { ValidationError, getRequestData } from "@utils";
+import { ValidationError, getRequestData, stepLogger } from "@utils";
 
 import { handleMutate } from "./handle-mutate.ts";
 import { handleDeltaSync } from "./handle-delta-sync.ts";
@@ -22,6 +22,10 @@ export function endPointHandler(action: any) {
 			return;
 		}
 		try {
+			stepLogger({
+				step: "endPointHandler",
+				params: { action, requestData },
+			});
 			await handler({ requestData, action, context });
 		} catch (err) {
 			console.error(err);

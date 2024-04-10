@@ -4,8 +4,8 @@ import { load } from "dotenv";
 import { withTryCatch } from "../utils/server/with-try-catch.ts";
 
 const env = await load();
-let redisClient: any;
 
+let redisClient: any;
 export const connectToRedis = withTryCatch(async () => {
 	if (redisClient) {
 		console.log("Reusing existing Redis connection...");

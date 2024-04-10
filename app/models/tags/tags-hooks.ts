@@ -1,0 +1,46 @@
+import { handleRedisDBOperation, stepLogger } from "@utils";
+
+export type hooksParams = {
+	data: any;
+	_ids?: string[];
+};
+
+export const preTagCreate = async ({ data }: hooksParams) => {
+	stepLogger({ step: "preTagCreate", params: { data } });
+};
+export const preTagUpdate = async ({ data }: hooksParams) => {};
+export const preTagDelete = async ({ data }: hooksParams) => {};
+
+export const postTagCreate = async ({ data }: hooksParams) => {
+	stepLogger({ step: "postTagCreate", params: { data } });
+
+	await handleRedisDBOperation({
+		collection: "tags",
+		operation: "create",
+		data: data,
+	});
+};
+
+export const postTagUpdate = async ({ data, _ids }: hooksParams) => {
+	stepLogger({ step: "postTagUpdate", params: { data, _ids } });
+
+	await handleRedisDBOperation({
+		collection: "tags",
+		operation: "update",
+		data: data,
+		_ids,
+	});
+};
+
+export const postTagDelete = async ({ data, _ids }: hooksParams) => {
+	stepLogger({ step: "postTagDelete", params: { data, _ids } });
+
+	await handleRedisDBOperation({
+		collection: "tags",
+		operation: "delete",
+		data: data,
+		_ids,
+	});
+
+	//TODO: bookmarks where the tag/s are used should be updated
+};
