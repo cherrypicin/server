@@ -8,6 +8,7 @@ let redisClient: any;
 
 export const connectToRedis = withTryCatch(async () => {
 	if (redisClient) {
+		console.log("Reusing existing Redis connection...");
 		return redisClient;
 	}
 
@@ -26,5 +27,7 @@ export const connectToRedis = withTryCatch(async () => {
 	});
 
 	redisClient = client;
+	await client.connect();
+	console.log("Connected to Redis!");
 	return client;
 }, "connection error - Failed to connect to Redis");
