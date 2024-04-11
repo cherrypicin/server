@@ -19,12 +19,12 @@ const collectionsSchema = new Schema("Collections", {
 	banner: { type: "string" },
 	bannerStyle: { type: "string" },
 	color: { type: "string" },
-	config: { type: "string" },
+	// config: { type: "string" },
 	bookmarks_sort: { type: "string", path: "$.config.bookmarks.sort" },
 	bookmarks_view: { type: "string", path: "$.config.bookmarks.view" },
 	bookmarks_hiddenFields: {
 		type: "string[]",
-		path: "$.config.bookmarks.hiddenFields",
+		path: "$.config.bookmarks.hiddenFields[*]",
 	},
 	bookmarks_coverImageSize: {
 		type: "number",
@@ -51,10 +51,10 @@ const collectionsSchema = new Schema("Collections", {
 	password: { type: "string" },
 	pinned: { type: "string[]" },
 	previousParent: { type: "string" },
-	sharedWith: { type: "string[]" },
+	// sharedWith: { type: "string[]" },
 	updatedAt: { type: "date" },
-	sharedWith_userId: { type: "string", path: "$.sharedWith[*].userId" },
-	sharedWith_access: { type: "string", path: "$.sharedWith[*].access" },
+	sharedWith_userId: { type: "string[]", path: "$.sharedWith[*].userId" },
+	sharedWith_access: { type: "string[]", path: "$.sharedWith[*].access" },
 	sharedWith_root: { type: "boolean", path: "$.sharedWith[*].root" },
 	userId: { type: "string" },
 });

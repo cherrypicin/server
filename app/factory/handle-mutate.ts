@@ -16,6 +16,7 @@ interface handleMutateParams {
 	data: any;
 	schema: any;
 	hooks: any;
+	arrayOperation?: string;
 }
 
 export const handleMutate = async ({
@@ -25,11 +26,19 @@ export const handleMutate = async ({
 	context,
 }: HandlerFunctionParams) => {
 	const { body } = requestData;
-	const { collection, operation, data } = body;
+	const { collection, operation, data, arrayOperation } = body;
 
-	stepLogger({ step: "handleMutate", params: { collection, operation, data } });
+	stepLogger({
+		step: "handleMutate",
+		params: { collection, operation, data, arrayOperation },
+	});
 
-	const result = await handleOperation({ collection, operation, data });
+	const result = await handleOperation({
+		collection,
+		operation,
+		data,
+		arrayOperation,
+	});
 
 	await manageSync({ data, collection, operation });
 
@@ -100,28 +109,135 @@ const handleUpdate = async ({
 	data,
 	schema,
 	hooks,
+	arrayOperation,
 }: handleMutateParams) => {
-	stepLogger({ step: "handleUpdate", params: { collection, data } });
+	stepLogger({
+		step: "handleUpdate",
+		params: { collection, data, arrayOperation },
+	});
+
 	await validateBody({ data, schema });
 
 	const _collection = await getCollection(collection);
 	const { _id, ...rest } = data;
-	const _ids = data._id.split(",");
+	const _ids = _id.split(",");
 
 	if (hooks && hooks.pre) {
 		await hooks.pre({ data: data });
 	}
 
-	const result = await _collection.updateMany(
-		{ _id: { $in: _ids } },
-		{ $set: rest }
-	);
+	let updateDoc = { $set: {}, $addToSet: {}, $pull: {} };
+	//@ts-ignore
+	let arrayFilterIdentifiers = [];
 
-	if (hooks && hooks.post) {
-		await hooks.post({ data: rest, _ids: _ids });
+	Object.entries(rest).forEach(([key, value]) => {
+		if (
+			key === "sharedWith" &&
+			arrayOperation === "update" &&
+			Array.isArray(value)
+		) {
+			if (value.length === 0) {
+				//@ts-ignore
+				updateDoc.$set[key] = [];
+				return;
+			} else {
+				value.forEach((item, index) => {
+					if (item.userId) {
+						const filterIdentifier = `elem${index}`;
+						arrayFilterIdentifiers.push({
+							[`${filterIdentifier}.userId`]: item.userId,
+						});
+
+						Object.keys(item).forEach((field) => {
+							//@ts-ignore
+							updateDoc.$set[`sharedWith.$[${filterIdentifier}].${field}`] =
+								item[field];
+						});
+					}
+				});
+			}
+		} else if (
+			key === "sharedWith" &&
+			arrayOperation === "remove" &&
+			Array.isArray(value)
+		) {
+			value.forEach((item) => {
+				if (item.userId) {
+					updateDoc.$pull = {
+						[key]: { userId: item.userId },
+					};
+				}
+			});
+		} else if (
+			key === "annotation" &&
+			arrayOperation === "update" &&
+			Array.isArray(value)
+		) {
+			// Special handling for 'annotation' or similar arrays
+			value.forEach((item, index) => {
+				if (item._id) {
+					// Construct a filter identifier and condition
+					const filterIdentifier = `elem${index}`;
+					arrayFilterIdentifiers.push({
+						[`${filterIdentifier}._id`]: item._id,
+					});
+
+					// Construct the update operation using the filter identifier
+					Object.keys(item).forEach((field) => {
+						//@ts-ignore
+						updateDoc.$set[`annotation.$[${filterIdentifier}].${field}`] =
+							item[field];
+					});
+				}
+			});
+		} else if (
+			key === "annotation" &&
+			arrayOperation === "remove" &&
+			Array.isArray(value)
+		) {
+			value.forEach((item) => {
+				if (item._id) {
+					updateDoc.$pull = {
+						[key]: { _id: item._id },
+					};
+				}
+			});
+		} else if (arrayOperation === "add" && Array.isArray(value)) {
+			//@ts-ignore
+			updateDoc.$addToSet[key] = { $each: value };
+		} else if (arrayOperation === "remove" && Array.isArray(value)) {
+			//@ts-ignore
+			updateDoc.$pull[key] = { $in: value };
+		} else {
+			//@ts-ignore
+			updateDoc.$set[key] = value;
+		}
+	});
+
+	// Clean up unused operators
+	["$addToSet", "$pull", "$set"].forEach((op) => {
+		//@ts-ignore
+		if (Object.keys(updateDoc[op]).length === 0) delete updateDoc[op];
+	});
+
+	console.log("handleUpdate-updateDoc", JSON.stringify(updateDoc, null, 2));
+
+	let result;
+	// Perform the update
+	if (arrayFilterIdentifiers.length === 0) {
+		result = await _collection.updateMany({ _id: { $in: _ids } }, updateDoc);
+	} else {
+		result = await _collection.updateMany({ _id: { $in: _ids } }, updateDoc, {
+			// @ts-ignore
+			arrayFilters: arrayFilterIdentifiers,
+		});
 	}
 
-	return { operation: "update", data: result.modifiedCount };
+	if (hooks && hooks.post) {
+		await hooks.post({ data: rest, _ids: _ids, arrayOperation });
+	}
+
+	return { operation: "update", result: result.modifiedCount };
 };
 
 const handleDelete = async ({
@@ -197,10 +313,12 @@ const handleOperation = async ({
 	collection,
 	operation,
 	data,
+	arrayOperation,
 }: {
 	collection: string;
 	operation: string;
 	data: any;
+	arrayOperation?: string;
 }) => {
 	stepLogger({
 		step: "handleOperation",
@@ -215,5 +333,5 @@ const handleOperation = async ({
 		throw new Error("Invalid operation");
 	}
 
-	return handler({ collection, data, schema, hooks });
+	return handler({ collection, data, schema, hooks, arrayOperation });
 };

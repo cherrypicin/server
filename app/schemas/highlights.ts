@@ -1,8 +1,10 @@
 import { Static, Type } from "typebox";
 
 const Annotation = Type.Object({
-	text: Type.String(),
-	creator: Type.String(),
+	//NOTE: this mandatory field as it is needed for the query
+	_id: Type.String(),
+	text: Type.Optional(Type.String()),
+	creator: Type.Optional(Type.String()),
 });
 
 export const HighlightSchema = Type.Object({

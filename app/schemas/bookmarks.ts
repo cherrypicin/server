@@ -9,7 +9,8 @@ const ImageType = Type.Union([
 ]);
 
 const Image = Type.Object({
-	type: ImageType,
+	type: Type.Optional(ImageType),
+	//NOTE: this mandatory field as it is needed for the query
 	url: Type.String(),
 });
 

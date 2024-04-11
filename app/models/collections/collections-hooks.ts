@@ -22,13 +22,21 @@ export const postCollectionCreate = async ({ data }: HooksParams) => {
 	});
 };
 
-export const postCollectionUpdate = async ({ data, _ids }: HooksParams) => {
-	stepLogger({ step: "postCollectionUpdate", params: { data, _ids } });
+export const postCollectionUpdate = async ({
+	data,
+	_ids,
+	arrayOperation,
+}: HooksParams) => {
+	stepLogger({
+		step: "postCollectionUpdate",
+		params: { data, _ids, arrayOperation },
+	});
 	await handleRedisDBOperation({
 		collection: "collections",
 		operation: "update",
 		data: data,
 		_ids,
+		arrayOperation,
 	});
 };
 

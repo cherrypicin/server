@@ -5,23 +5,30 @@ const BookmarkId = Type.String();
 const UserId = Type.String();
 
 const SharedWithSchema = Type.Object({
+	//NOTE: this mandatory field as it is needed for the query
 	userId: UserId,
-	access: Type.Union([Type.Literal("edit"), Type.Literal("view")]),
-	root: Type.Boolean(),
+	access: Type.Optional(
+		Type.Union([Type.Literal("edit"), Type.Literal("view")])
+	),
+	root: Type.Optional(Type.Boolean()),
 });
 
 const ConfigSchema = Type.Object({
-	bookmarks: Type.Object({
-		view: Type.String(),
-		sort: Type.String(),
-		hiddenFields: Type.Array(Type.String()),
-		coverImageSize: Type.Number({ minimum: 0, maximum: 1 }),
-		coverImageRight: Type.Boolean(),
-	}),
-	collections: Type.Object({
-		view: Type.String(),
-		sort: Type.String(),
-	}),
+	bookmarks: Type.Optional(
+		Type.Object({
+			view: Type.Optional(Type.String()),
+			sort: Type.Optional(Type.String()),
+			hiddenFields: Type.Optional(Type.Array(Type.String())),
+			coverImageSize: Type.Optional(Type.Number({ minimum: 0, maximum: 1 })),
+			coverImageRight: Type.Optional(Type.Boolean()),
+		})
+	),
+	collections: Type.Optional(
+		Type.Object({
+			view: Type.Optional(Type.String()),
+			sort: Type.Optional(Type.String()),
+		})
+	),
 });
 
 export const CollectionSchema = Type.Object({
