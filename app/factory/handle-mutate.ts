@@ -9,28 +9,21 @@ import {
 	stepLogger,
 } from "@utils";
 
-import { HandlerFunctionParams } from "./types.ts";
+import {
+	HandleOperationParams,
+	HandlerFunctionParams,
+	HandleMutateParams,
+} from "./types.ts";
 
-interface handleMutateParams {
-	collection: string;
-	data: any;
-	schema: any;
-	hooks: any;
-	arrayOperation?: string;
-}
+export const handleMutate = async (params: HandlerFunctionParams) => {
+	const { requestData, context } = params;
 
-export const handleMutate = async ({
-	requestData,
-	action,
-	details,
-	context,
-}: HandlerFunctionParams) => {
-	const { body } = requestData;
+	const { body, userId } = requestData;
 	const { collection, operation, data, arrayOperation } = body;
 
 	stepLogger({
 		step: "handleMutate",
-		params: { collection, operation, data, arrayOperation },
+		params,
 	});
 
 	const result = await handleOperation({
@@ -38,6 +31,7 @@ export const handleMutate = async ({
 		operation,
 		data,
 		arrayOperation,
+		userId,
 	});
 
 	await manageSync({ data, collection, operation });
@@ -69,21 +63,19 @@ const manageSync = async ({
 		updatedAt: new Date(),
 		syncId: 1238,
 	};
-
+	//@ts-ignore
 	await handleRedisDBOperation({
 		collection: "syncDB",
 		operation: "create",
 		data: syncPacket,
+		userId: "12347",
 	});
 };
 
-const handleCreate = async ({
-	collection,
-	data,
-	schema,
-	hooks,
-}: handleMutateParams) => {
-	stepLogger({ step: "handleCreate", params: { collection, data } });
+const handleCreate = async (params: HandleMutateParams) => {
+	const { collection, data, hooks, schema } = params;
+
+	stepLogger({ step: "handleCreate", params });
 
 	await validateBody({ data, schema });
 
@@ -104,26 +96,33 @@ const handleCreate = async ({
 	};
 };
 
-const handleUpdate = async ({
-	collection,
-	data,
-	schema,
-	hooks,
-	arrayOperation,
-}: handleMutateParams) => {
+const handleUpdate = async (params: HandleMutateParams) => {
+	const { collection, data, hooks, schema, arrayOperation, userId } = params;
+
 	stepLogger({
 		step: "handleUpdate",
-		params: { collection, data, arrayOperation },
+		params,
 	});
 
 	await validateBody({ data, schema });
 
 	const _collection = await getCollection(collection);
+
 	const { _id, ...rest } = data;
-	const _ids = _id.split(",");
+
+	let _ids = _id.split(",");
+	let dataInDbBeforeMutation = [];
 
 	if (hooks && hooks.pre) {
-		await hooks.pre({ data: data });
+		const { updatedIds, currentData } = await hooks.pre({
+			data,
+			collection,
+			_ids,
+			userId,
+		});
+
+		_ids = updatedIds;
+		dataInDbBeforeMutation = currentData;
 	}
 
 	let updateDoc = { $set: {}, $addToSet: {}, $pull: {} };
@@ -225,27 +224,34 @@ const handleUpdate = async ({
 	let result;
 	// Perform the update
 	if (arrayFilterIdentifiers.length === 0) {
-		result = await _collection.updateMany({ _id: { $in: _ids } }, updateDoc);
+		result = await _collection.updateMany(
+			{ _id: { $in: _ids }, userId: "12347" },
+			updateDoc
+		);
 	} else {
 		result = await _collection.updateMany({ _id: { $in: _ids } }, updateDoc, {
 			// @ts-ignore
 			arrayFilters: arrayFilterIdentifiers,
+			explain: true,
 		});
 	}
 
 	if (hooks && hooks.post) {
-		await hooks.post({ data: rest, _ids: _ids, arrayOperation });
+		await hooks.post({
+			data: rest,
+			_ids: _ids,
+			arrayOperation,
+			dataInDbBeforeMutation,
+		});
 	}
 
-	return { operation: "update", result: result.modifiedCount };
+	return { operation: "update", result: result };
 };
 
-const handleDelete = async ({
-	collection,
-	data,
-	hooks,
-}: handleMutateParams) => {
-	stepLogger({ step: "handleDelete", params: { collection, data } });
+const handleDelete = async (params: HandleMutateParams) => {
+	const { collection, data, hooks } = params;
+
+	stepLogger({ step: "handleDelete", params });
 
 	const _collection = await getCollection(collection);
 	const _ids = data._id.split(",");
@@ -263,14 +269,10 @@ const handleDelete = async ({
 	return { operation: "delete", data: result.deletedCount };
 };
 
-function convertToDatesUsingSchema({
-	data,
-	schema,
-}: {
-	data: any;
-	schema: any;
-}) {
-	stepLogger({ step: "convertToDatesUsingSchema", params: { data, schema } });
+function convertToDatesUsingSchema(params: { data: any; schema: any }) {
+	const { data, schema } = params;
+
+	stepLogger({ step: "convertToDatesUsingSchema", params });
 	const schemaProperties = schema.properties;
 
 	Object.keys(schemaProperties).forEach((key) => {
@@ -282,8 +284,10 @@ function convertToDatesUsingSchema({
 	return data;
 }
 
-const validateBody = async ({ data, schema }: { data: any; schema: any }) => {
-	stepLogger({ step: "validateBody", params: { data, schema } });
+const validateBody = async (params: { data: any; schema: any }) => {
+	const { data, schema } = params;
+
+	stepLogger({ step: "validateBody", params });
 	//@ts-ignore
 	const ajv = new Ajv({
 		allErrors: true,
@@ -309,20 +313,12 @@ const operationHandlers = {
 	delete: handleDelete,
 };
 
-const handleOperation = async ({
-	collection,
-	operation,
-	data,
-	arrayOperation,
-}: {
-	collection: string;
-	operation: string;
-	data: any;
-	arrayOperation?: string;
-}) => {
+const handleOperation = async (params: HandleOperationParams) => {
+	const { collection, operation, data, arrayOperation, userId } = params;
+
 	stepLogger({
 		step: "handleOperation",
-		params: { collection, operation, data },
+		params,
 	});
 	//@ts-ignore
 	const { schema, hooks } = getModelMapping({ collection, operation });
@@ -333,5 +329,5 @@ const handleOperation = async ({
 		throw new Error("Invalid operation");
 	}
 
-	return handler({ collection, data, schema, hooks, arrayOperation });
+	return handler({ ...params, schema, hooks });
 };

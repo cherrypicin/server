@@ -12,7 +12,7 @@ export interface RequestData {
 	search: string;
 	searchParams?: { [key: string]: string };
 	userAgent?: string;
-	userId?: string;
+	userId: string;
 }
 
 const parseCookies = (header: string | null) => {
@@ -71,6 +71,7 @@ const getRequestData = async <T extends string>(
 		search,
 		searchParams: searchParamsObject,
 		userAgent,
+		userId: "12347",
 	};
 
 	return Object.freeze(requestData) as RequestData;

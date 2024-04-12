@@ -1,6 +1,7 @@
 import { Context } from "oak";
 
 import { RequestData } from "@utils";
+import { Repository } from "redis-om";
 
 export type Action =
 	| "get"
@@ -36,3 +37,25 @@ export type HandlerFunction = ({
 export type ActionHandlers = {
 	[K in Action]: HandlerFunction;
 };
+
+export type HandleOperationParams = {
+	arrayOperation?: string;
+	collection: string;
+	data: any;
+	operation: string;
+	userId: string;
+};
+
+export interface HandleMutateParams extends HandleOperationParams {
+	hooks: any;
+	schema: any;
+}
+
+export interface HandlePostUpdateParams extends HandleOperationParams {
+	_ids: string[];
+	dataInDbBeforeMutation: any;
+}
+
+export interface RedisDBOperationsParams extends HandlePostUpdateParams {
+	repository: Repository;
+}

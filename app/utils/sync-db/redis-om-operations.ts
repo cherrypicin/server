@@ -1,22 +1,18 @@
 import { getRepository } from "@connections";
 import { SyncDBError, stepLogger } from "@utils";
-import { Repository } from "redis-om";
+import {
+	HandlePostUpdateParams,
+	RedisDBOperationsParams,
+} from "../../factory/types.ts";
 
-type RedisDBOperationsParams = {
-	repository: Repository;
-	data: any;
-	_ids?: string[];
-	arrayOperation?: string;
-};
+export const saveToRepository = async (params: RedisDBOperationsParams) => {
+	const { repository, data } = params;
 
-export const saveToRepository = async ({
-	repository,
-	data,
-}: RedisDBOperationsParams) => {
 	stepLogger({
 		step: "saveToRepository",
-		params: { repository, data },
+		params,
 	});
+
 	if (!repository) {
 		throw new Error("Repository not found");
 	}
@@ -29,25 +25,29 @@ export const saveToRepository = async ({
 	}
 };
 
-export const deleteFromRepository = async ({
-	repository,
-	_ids,
-}: RedisDBOperationsParams) => {
+export const deleteFromRepository = async (params: RedisDBOperationsParams) => {
+	const { repository, _ids } = params;
+
+	stepLogger({
+		step: "deleteFromRepository",
+		params,
+	});
+
 	// await repository.delete(data);
 	_ids?.forEach(async (_id) => {
 		await repository.remove(_id);
 	});
 };
 
-export const updateInRepository = async ({
-	repository,
-	data,
-	_ids,
-	arrayOperation,
-}: RedisDBOperationsParams): Promise<void> => {
+export const updateInRepository = async (
+	params: RedisDBOperationsParams
+): Promise<void> => {
+	const { repository, data, _ids, arrayOperation, dataInDbBeforeMutation } =
+		params;
+
 	stepLogger({
 		step: "updateInRepository",
-		params: { repository, data, _ids, arrayOperation },
+		params,
 	});
 
 	const updateAtPath = ({
@@ -154,7 +154,9 @@ export const updateInRepository = async ({
 	}
 
 	for (const _id of _ids) {
-		const currentData = await repository.fetch(_id);
+		const currentData = dataInDbBeforeMutation.find(
+			(item: any) => item._id === _id
+		);
 		let updatedData = { ...currentData };
 
 		Object.entries(data).forEach(([path, value]) => {
@@ -187,28 +189,36 @@ export const updateInRepository = async ({
 	}
 };
 
+export const getFromRepository = async (params: RedisDBOperationsParams) => {
+	const { repository, _ids } = params;
+
+	stepLogger({
+		step: "getFromRepository",
+		params,
+	});
+
+	//@ts-ignore
+	const data = await Promise.all(_ids.map((_id) => repository.fetch(_id)));
+
+	console.log("getFromRepository", data);
+	return data;
+};
+
 const redisDBOperations = {
 	create: saveToRepository,
 	delete: deleteFromRepository,
 	update: updateInRepository,
+	get: getFromRepository,
 };
 
-export const handleRedisDBOperation = async ({
-	operation,
-	collection,
-	data,
-	_ids,
-	arrayOperation,
-}: {
-	operation: string;
-	collection: string;
-	data: any;
-	_ids?: string[];
-	arrayOperation?: string;
-}) => {
+export const handleRedisDBOperation = async (
+	params: HandlePostUpdateParams
+) => {
+	const { operation, collection } = params;
+
 	stepLogger({
 		step: "handleRedisDBOperation",
-		params: { operation, collection, data, arrayOperation },
+		params,
 	});
 	// @ts-ignore
 	const operationHandler = redisDBOperations[operation];
@@ -218,7 +228,12 @@ export const handleRedisDBOperation = async ({
 	const repository = getRepository(collection);
 
 	try {
-		await operationHandler({ repository, data, _ids, arrayOperation });
+		const result = await operationHandler({
+			...params,
+			repository,
+		});
+
+		return result;
 	} catch (err) {
 		console.log("redis ops", err);
 		throw new SyncDBError("Sync DB Error", err);
