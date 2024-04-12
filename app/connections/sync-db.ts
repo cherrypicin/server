@@ -78,6 +78,8 @@ const collectionsRepository = new Repository(collectionsSchema, redis);
 const tagsRepository = new Repository(tagsSchema, redis);
 
 await syncDBRepository.createIndex();
+await collectionsRepository.createIndex();
+await tagsRepository.createIndex();
 
 const getRepository = (collection: string) => {
 	stepLogger({ step: "getRepository", params: { collection } });

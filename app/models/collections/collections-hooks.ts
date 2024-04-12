@@ -1,6 +1,16 @@
-import { handleRedisDBOperation, stepLogger } from "@utils";
+import { handleDBOperation, handleRedisDBOperation, stepLogger } from "@utils";
 import { HooksParams } from "../types.ts";
 import { Collection } from "../../schemas/collections.ts";
+
+export const preCollectionGetFilter = async (params: HooksParams) => {
+	const { userId } = params;
+
+	const filter = {
+		$or: [{ userId }, { "sharedWith.userId": userId }],
+	};
+
+	return { filter };
+};
 
 export const preCollectionCreate = async (params: HooksParams) => {
 	stepLogger({ step: "preCollectionCreate", params });
@@ -11,11 +21,11 @@ export const preCollectionUpdate = async (params: HooksParams) => {
 
 	stepLogger({ step: "preCollectionUpdate", params });
 
-	const dataInCache = await handleRedisDBOperation({
+	const dataInCache = await handleDBOperation({
 		collection: "collections",
 		operation: "get",
-		data: data,
 		_ids,
+		data,
 	});
 
 	const filteredIds = dataInCache
@@ -44,6 +54,7 @@ export const postCollectionCreate = async (params: HooksParams) => {
 
 	stepLogger({ step: "postCollectionCreate", params: { data } });
 
+	//@ts-ignore
 	await handleRedisDBOperation({
 		collection: "collections",
 		operation: "create",
@@ -79,5 +90,6 @@ export const postCollectionDelete = async (params: HooksParams) => {
 		operation: "delete",
 		data: data,
 		_ids,
+		dataInDbBeforeMutation: [],
 	});
 };

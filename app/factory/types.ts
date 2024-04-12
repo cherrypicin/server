@@ -2,6 +2,7 @@ import { Context } from "oak";
 
 import { RequestData } from "@utils";
 import { Repository } from "redis-om";
+import { Collection } from "mongodb";
 
 export type Action =
 	| "get"
@@ -43,7 +44,7 @@ export type HandleOperationParams = {
 	collection: string;
 	data: any;
 	operation: string;
-	userId: string;
+	userId?: string;
 };
 
 export interface HandleMutateParams extends HandleOperationParams {
@@ -52,10 +53,19 @@ export interface HandleMutateParams extends HandleOperationParams {
 }
 
 export interface HandlePostUpdateParams extends HandleOperationParams {
-	_ids: string[];
+	_ids?: string[];
 	dataInDbBeforeMutation: any;
 }
 
 export interface RedisDBOperationsParams extends HandlePostUpdateParams {
 	repository: Repository;
+}
+
+export interface HandleDBOperationParams extends HandleOperationParams {
+	_ids?: string[];
+	filter?: any;
+}
+
+export interface DBOperationParams extends HandleDBOperationParams {
+	mongoDBCollection: Collection;
 }

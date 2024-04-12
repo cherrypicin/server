@@ -5,6 +5,11 @@ export const collectionsModel = {
 	schema: CollectionSchema,
 	collection: "collections",
 	alias: "collections",
+	get: {
+		hooks: {
+			pre: collectionHooks.preCollectionGetFilter,
+		},
+	},
 	create: {
 		schema: CollectionSchema,
 		hooks: {

@@ -6,10 +6,14 @@ import { ValidationError, getRequestData, stepLogger } from "@utils";
 import { handleMutate } from "./handle-mutate.ts";
 import { handleDeltaSync } from "./handle-delta-sync.ts";
 import { ActionHandlers } from "./types.ts";
+import { handleGet } from "./handle-get.ts";
+import { handleFullBootstrap } from "./handle-full-bootstrap.ts";
 
 const actionHandlers: ActionHandlers = {
 	mutate: handleMutate,
 	"delta-sync": handleDeltaSync,
+	"full-bootstrap": handleFullBootstrap,
+	get: handleGet,
 };
 
 export function endPointHandler(action: any) {
