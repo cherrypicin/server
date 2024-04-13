@@ -1,6 +1,6 @@
 import { handleDBOperation, handleRedisDBOperation, stepLogger } from "@utils";
 import { HooksParams } from "../types.ts";
-import { Collection } from "../../schemas/collections.ts";
+import { handleDenoKVOperation } from "@utils";
 
 export const preCollectionGetFilter = async (params: HooksParams) => {
 	const { userId } = params;
@@ -21,27 +21,24 @@ export const preCollectionUpdate = async (params: HooksParams) => {
 
 	stepLogger({ step: "preCollectionUpdate", params });
 
-	const dataInCache = await handleDBOperation({
-		collection: "collections",
-		operation: "get",
+	const dataInDenoKV = await handleDenoKVOperation({
+		//@ts-ignore
+		prefix: [userId, "collections"],
 		_ids,
 		data,
+		operation: "get-keys-by-prefix",
 	});
 
-	const filteredIds = dataInCache
-		.filter((collection: Collection) => {
-			const isOwner = collection.userId === userId;
+	console.log("dataInDenoKV", dataInDenoKV);
+	const _filteredIds = [] as any;
 
-			const isSharedWithEditAccess = collection.sharedWith?.some(
-				(shared: any) => shared.userId === userId && shared.access === "edit"
-			);
+	dataInDenoKV.forEach((item: any) => {
+		if (item.value !== null) {
+			_filteredIds.push(item.value);
+		}
+	});
 
-			return isOwner || isSharedWithEditAccess;
-		})
-
-		.map((collection: Collection) => collection._id);
-
-	return { updatedIds: filteredIds, currentData: dataInCache };
+	return { updatedIds: _filteredIds, currentData: {} };
 };
 
 export const preCollectionDelete = async (params: HooksParams) => {
@@ -50,16 +47,24 @@ export const preCollectionDelete = async (params: HooksParams) => {
 };
 
 export const postCollectionCreate = async (params: HooksParams) => {
-	const { data } = params;
+	const { data, userId } = params;
 
 	stepLogger({ step: "postCollectionCreate", params: { data } });
 
 	//@ts-ignore
-	await handleRedisDBOperation({
-		collection: "collections",
-		operation: "create",
+	await handleDenoKVOperation({
+		key: [userId, "collections", data._id],
+		value: data._id,
 		data: data,
+		operation: "create",
 	});
+
+	//@ts-ignore
+	// await handleRedisDBOperation({
+	// 	collection: "collections",
+	// 	operation: "create",
+	// 	data: data,
+	// });
 };
 
 export const postCollectionUpdate = async (params: HooksParams) => {
@@ -70,14 +75,14 @@ export const postCollectionUpdate = async (params: HooksParams) => {
 		params,
 	});
 
-	await handleRedisDBOperation({
-		collection: "collections",
-		operation: "update",
-		data: data,
-		_ids,
-		arrayOperation,
-		dataInDbBeforeMutation,
-	});
+	// await handleRedisDBOperation({
+	// 	collection: "collections",
+	// 	operation: "update",
+	// 	data: data,
+	// 	_ids,
+	// 	arrayOperation,
+	// 	dataInDbBeforeMutation,
+	// });
 };
 
 export const postCollectionDelete = async (params: HooksParams) => {

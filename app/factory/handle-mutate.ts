@@ -14,6 +14,7 @@ import {
 	HandlerFunctionParams,
 	HandleMutateParams,
 } from "./types.ts";
+import { handleDenoKVOperation } from "@utils";
 
 export const handleMutate = async (params: HandlerFunctionParams) => {
 	const { requestData, context } = params;
@@ -34,7 +35,7 @@ export const handleMutate = async (params: HandlerFunctionParams) => {
 		userId,
 	});
 
-	await manageSync({ data, collection, operation });
+	await manageSync({ data, collection, operation, userId });
 
 	//@ts-ignore
 	context.response.headers.set("Content-Type", "application/json");
@@ -49,27 +50,62 @@ const manageSync = async ({
 	data,
 	collection,
 	operation,
+	userId,
 }: {
 	data: any;
 	collection: string;
 	operation: string;
+	userId: string;
 }) => {
+	const syncId = 1;
+
+	const _syncId = await handleDenoKVOperation({
+		operation: "get",
+		key: [userId, "syncId"],
+		value: JSON.stringify(1),
+		data,
+		prefix: [],
+	});
+
+	console.log("syncId", _syncId);
+
+	const syncIdInDB = _syncId ? Number(_syncId.value) + 1 : 0;
+
+	console.log("syncIdInDB", syncIdInDB);
+
 	let syncPacket = {
 		_id: crypto.randomUUID(),
 		data: JSON.stringify(data),
 		collection,
 		operation,
-		userId: 12347,
+		userId,
 		updatedAt: new Date(),
-		syncId: 1238,
+		syncId: syncIdInDB,
 	};
-	//@ts-ignore
-	await handleRedisDBOperation({
-		collection: "syncDB",
+
+	await handleDenoKVOperation({
 		operation: "create",
+		key: [userId, "syncDB", JSON.stringify(syncIdInDB)],
+		value: JSON.stringify(syncPacket),
 		data: syncPacket,
-		userId: "12347",
+		prefix: [],
 	});
+
+	await handleDenoKVOperation({
+		operation: "create",
+		key: [userId, "syncId"],
+		value: JSON.stringify(syncIdInDB),
+		data: syncPacket,
+		prefix: [],
+	});
+
+	//@ts-ignore
+	// await handleRedisDBOperation({
+	// 	collection: "syncDB",
+	// 	operation: "create",
+	// 	data: syncPacket,
+	// 	userId: "12347",
+	// });
 };
 
 const handleCreate = async (params: HandleMutateParams) => {
@@ -80,14 +116,14 @@ const handleCreate = async (params: HandleMutateParams) => {
 	await validateBody({ data, schema });
 
 	if (hooks && hooks.pre) {
-		await hooks.pre({ data: data });
+		await hooks.pre(params);
 	}
 
 	const _collection = await getCollection(collection);
 	const result = await _collection.insertOne(data);
 
 	if (hooks && hooks.post) {
-		await hooks.post({ data: data });
+		await hooks.post(params);
 	}
 
 	return {

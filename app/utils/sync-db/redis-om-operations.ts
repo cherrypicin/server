@@ -61,7 +61,6 @@ export const updateInRepository = async (
 		arrayOperation: string;
 		value: any;
 	}) => {
-		console.log("updateAtPath", { currentData, path, arrayOperation, value });
 		const keys = path.split(".");
 		const lastKey = keys.pop();
 		let target = currentData;
@@ -71,7 +70,6 @@ export const updateInRepository = async (
 			target = target[key];
 		});
 		if (!lastKey) {
-			console.log("updateAtPath_lastKey", { target, lastKey, value });
 			return;
 		}
 		if (arrayOperation === "add" && Array.isArray(value)) {
@@ -87,7 +85,6 @@ export const updateInRepository = async (
 				);
 			}
 		} else {
-			console.log("updateAtPath_else", { target, lastKey, value });
 			//@ts-ignore
 			target[lastKey] = value;
 		}
