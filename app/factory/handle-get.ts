@@ -112,10 +112,14 @@ export const handleGet = async (params: HandlerFunctionParams) => {
 			//@ts-ignore
 			filter = {
 				...preHookResult.filter,
-				...query.query,
 			};
 		}
 	}
+
+	filter = {
+		...filter,
+		...query.query,
+	};
 
 	stepLogger({
 		step: "handleGet",

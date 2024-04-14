@@ -1,4 +1,4 @@
-import { handleDBOperation, handleRedisDBOperation, stepLogger } from "@utils";
+import { handleDBOperation, stepLogger } from "@utils";
 import { HooksParams } from "../types.ts";
 import { handleDenoKVOperation } from "@utils";
 
@@ -20,25 +20,6 @@ export const preCollectionCreate = async (params: HooksParams) => {
 export const preCollectionUpdate = async (params: HooksParams) => {
 	const { data, _ids, userId } = params;
 
-	// stepLogger({ step: "preCollectionUpdate", params });
-
-	// const dataInDenoKV = await handleDenoKVOperation({
-	// 	//@ts-ignore
-	// 	prefix: [userId, "collections"],
-	// 	_ids,
-	// 	data,
-	// 	operation: "get-keys-by-prefix",
-	// });
-
-	// console.log("dataInDenoKV", dataInDenoKV);
-	// const _filteredIds = [] as any;
-
-	// dataInDenoKV.forEach((item: any) => {
-	// 	if (item.value !== null) {
-	// 		_filteredIds.push(item.value);
-	// 	}
-	// });
-
 	return { updatedIds: _ids, currentData: {} };
 };
 
@@ -59,13 +40,6 @@ export const postCollectionCreate = async (params: HooksParams) => {
 		data: data,
 		operation: "create",
 	});
-
-	//@ts-ignore
-	// await handleRedisDBOperation({
-	// 	collection: "collections",
-	// 	operation: "create",
-	// 	data: data,
-	// });
 };
 
 export const postCollectionUpdate = async (params: HooksParams) => {
@@ -75,27 +49,10 @@ export const postCollectionUpdate = async (params: HooksParams) => {
 		step: "postCollectionUpdate",
 		params,
 	});
-
-	// await handleRedisDBOperation({
-	// 	collection: "collections",
-	// 	operation: "update",
-	// 	data: data,
-	// 	_ids,
-	// 	arrayOperation,
-	// 	dataInDbBeforeMutation,
-	// });
 };
 
 export const postCollectionDelete = async (params: HooksParams) => {
 	const { data, _ids } = params;
 
 	stepLogger({ step: "postCollectionDelete", params });
-
-	await handleRedisDBOperation({
-		collection: "collections",
-		operation: "delete",
-		data: data,
-		_ids,
-		dataInDbBeforeMutation: [],
-	});
 };

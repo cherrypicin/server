@@ -5,6 +5,11 @@ export const tagsModel = {
 	schema: TagSchema,
 	collection: "tags",
 	alias: "tags",
+	get: {
+		hooks: {
+			pre: tagHooks.preTagGet,
+		},
+	},
 	create: {
 		schema: TagSchema,
 		hooks: {

@@ -18,7 +18,7 @@ export const getModelMapping = ({
 		return null;
 	}
 	return {
-		schema: model[operation].schema,
-		hooks: model[operation].hooks,
+		schema: model[operation].schema ?? model.schema,
+		hooks: model[operation].hooks ?? {},
 	};
 };

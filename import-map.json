@@ -3,6 +3,7 @@
 		"colors": "https://deno.land/std@0.114.0/fmt/colors.ts",
 		"dotenv": "https://deno.land/std@0.221.0/dotenv/mod.ts",
 		"mongodb": "npm:mongodb@5.9.2",
+		"deno-mongodb": "https://deno.land/x/mongo@v0.31.1/mod.ts",
 		"oak": "https://deno.land/x/oak@v14.1.0/mod.ts",
 		"oak-cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
 		"redis-om": "npm:redis-om@0.4.3",
