@@ -59,19 +59,19 @@ const manageSync = async ({
 }) => {
 	const syncId = 1;
 
-	const _syncId = await handleDenoKVOperation({
-		operation: "get",
-		key: [userId, "syncId"],
-		value: JSON.stringify(1),
-		data,
-		prefix: [],
-	});
+	// const _syncId = await handleDenoKVOperation({
+	// 	operation: "get",
+	// 	key: [userId, "syncId"],
+	// 	value: JSON.stringify(1),
+	// 	data,
+	// 	prefix: [],
+	// });
 
-	console.log("syncId", _syncId);
+	// console.log("syncId", _syncId);
 
-	const syncIdInDB = _syncId ? Number(_syncId.value) + 1 : 0;
+	// const syncIdInDB = _syncId ? Number(_syncId.value) + 1 : 0;
 
-	console.log("syncIdInDB", syncIdInDB);
+	// console.log("syncIdInDB", syncIdInDB);
 
 	let syncPacket = {
 		_id: crypto.randomUUID(),
@@ -80,24 +80,24 @@ const manageSync = async ({
 		operation,
 		userId,
 		updatedAt: new Date(),
-		syncId: syncIdInDB,
+		syncId: 1,
 	};
 
 	await handleDenoKVOperation({
 		operation: "create",
-		key: [userId, "syncDB", JSON.stringify(syncIdInDB)],
+		key: [userId, "syncDB", JSON.stringify(1)],
 		value: JSON.stringify(syncPacket),
 		data: syncPacket,
 		prefix: [],
 	});
 
-	await handleDenoKVOperation({
-		operation: "create",
-		key: [userId, "syncId"],
-		value: JSON.stringify(syncIdInDB),
-		data: syncPacket,
-		prefix: [],
-	});
+	// await handleDenoKVOperation({
+	// 	operation: "create",
+	// 	key: [userId, "syncId"],
+	// 	value: JSON.stringify(1),
+	// 	data: syncPacket,
+	// 	prefix: [],
+	// });
 
 	//@ts-ignore
 	// await handleRedisDBOperation({

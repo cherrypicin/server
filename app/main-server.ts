@@ -8,7 +8,7 @@ import {
 import { corsMiddleware, logNetwork } from "@utils";
 import { registerRoutes, routes } from "@routes";
 
-await connectToRedis();
+// await connectToRedis();
 await connectToDatabase();
 await connectToDenoKV();
 

@@ -38,7 +38,7 @@ export const getMany = async (params: DenoKVOperationParams) => {
 	}
 
 	if (kv && keys) {
-		const data = await kv.getMany(keys);
+		const data = await kv.getMany(keys, { consistency: "eventual" });
 		return data;
 	}
 };

@@ -5,9 +5,10 @@ import { handleDenoKVOperation } from "@utils";
 export const preCollectionGetFilter = async (params: HooksParams) => {
 	const { userId } = params;
 
-	const filter = {
-		$or: [{ userId }, { "sharedWith.userId": userId }],
-	};
+	// const filter = {
+	// 	$or: [{ userId }, { "sharedWith.userId": userId }],
+	// };
+	const filter = { userId };
 
 	return { filter };
 };
@@ -19,26 +20,26 @@ export const preCollectionCreate = async (params: HooksParams) => {
 export const preCollectionUpdate = async (params: HooksParams) => {
 	const { data, _ids, userId } = params;
 
-	stepLogger({ step: "preCollectionUpdate", params });
+	// stepLogger({ step: "preCollectionUpdate", params });
 
-	const dataInDenoKV = await handleDenoKVOperation({
-		//@ts-ignore
-		prefix: [userId, "collections"],
-		_ids,
-		data,
-		operation: "get-keys-by-prefix",
-	});
+	// const dataInDenoKV = await handleDenoKVOperation({
+	// 	//@ts-ignore
+	// 	prefix: [userId, "collections"],
+	// 	_ids,
+	// 	data,
+	// 	operation: "get-keys-by-prefix",
+	// });
 
-	console.log("dataInDenoKV", dataInDenoKV);
-	const _filteredIds = [] as any;
+	// console.log("dataInDenoKV", dataInDenoKV);
+	// const _filteredIds = [] as any;
 
-	dataInDenoKV.forEach((item: any) => {
-		if (item.value !== null) {
-			_filteredIds.push(item.value);
-		}
-	});
+	// dataInDenoKV.forEach((item: any) => {
+	// 	if (item.value !== null) {
+	// 		_filteredIds.push(item.value);
+	// 	}
+	// });
 
-	return { updatedIds: _filteredIds, currentData: {} };
+	return { updatedIds: _ids, currentData: {} };
 };
 
 export const preCollectionDelete = async (params: HooksParams) => {

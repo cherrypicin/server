@@ -53,28 +53,28 @@ const getTags = async (params: DBOperationParams) => {
 	return data;
 };
 
-const getDocsByIds = async (params: DBOperationParams) => {
+const getDocs = async (params: DBOperationParams) => {
 	const { mongoDBCollection, _ids, userId, filter } = params;
 
-	if (!_ids || _ids.length === 0) {
-		return [];
-	} else {
-		const data = await mongoDBCollection
-			.find({
-				//@ts-ignore
-				_id: { $in: _ids },
-				...filter,
-			})
-			.toArray();
+	console.log("mongoDBCollection", filter);
 
-		return data;
-	}
+	// if (!_ids || _ids.length === 0) {
+	// 	return [];
+	// } else {
+	const data = await mongoDBCollection
+		.find({
+			...filter,
+		})
+		.toArray();
+
+	return data;
+	// }
 };
 
 const dbOperations = {
 	"get-all-collections": getCollections,
 	"get-all-tags": getTags,
-	get: getDocsByIds,
+	get: getDocs,
 };
 
 export const handleDBOperation = async (params: HandleDBOperationParams) => {
