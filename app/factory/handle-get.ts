@@ -44,6 +44,19 @@ function convertToMongoDBQuery(queryObject) {
 		}
 	}
 
+	if (queryObject.color && queryObject.color.values) {
+		const colorArray = queryObject.color.values.split(",");
+		switch (queryObject.color.operator) {
+			case "is any of":
+				query.color = { $in: colorArray };
+				break;
+			case "is not any of":
+				query.color = { $nin: colorArray };
+				break;
+			// 'is all of' or 'is none of' cases may not be applicable for a noteColor as it typically has one value
+		}
+	}
+
 	// Translate other fields directly
 	for (let [key, value] of Object.entries(queryObject)) {
 		if (

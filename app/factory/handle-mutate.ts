@@ -2,12 +2,7 @@ import Ajv from "npm:ajv";
 import addFormats from "npm:ajv-formats";
 
 import { getModelMapping } from "@models";
-import {
-	ValidationError,
-	getCollection,
-	handleRedisDBOperation,
-	stepLogger,
-} from "@utils";
+import { ValidationError, getCollection, stepLogger } from "@utils";
 
 import {
 	HandleOperationParams,
@@ -147,18 +142,17 @@ const handleUpdate = async (params: HandleMutateParams) => {
 	const { _id, ...rest } = data;
 
 	let _ids = _id.split(",");
-	let dataInDbBeforeMutation = [];
+	// let dataInDbBeforeMutation = [];
 
 	if (hooks && hooks.pre) {
-		const { updatedIds, currentData } = await hooks.pre({
-			data,
-			collection,
-			_ids,
-			userId,
-		});
-
-		_ids = updatedIds;
-		dataInDbBeforeMutation = currentData;
+		// const { updatedIds, currentData } = await hooks.pre({
+		// 	data,
+		// 	collection,
+		// 	_ids,
+		// 	userId,
+		// });
+		// _ids = updatedIds;
+		// dataInDbBeforeMutation = currentData;
 	}
 
 	let updateDoc = { $set: {}, $addToSet: {}, $pull: {} };
@@ -277,7 +271,7 @@ const handleUpdate = async (params: HandleMutateParams) => {
 			data: rest,
 			_ids: _ids,
 			arrayOperation,
-			dataInDbBeforeMutation,
+			// dataInDbBeforeMutation,
 		});
 	}
 

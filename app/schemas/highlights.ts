@@ -8,22 +8,26 @@ const Annotation = Type.Object({
 });
 
 export const HighlightSchema = Type.Object({
-	_id: Type.String(),
-	annotation: Type.Array(Annotation),
-	bookmarkId: Type.String(),
-	color: Type.String(),
-	createdAt: Type.String({ format: "date-time" }),
-	creator: Type.String(),
-	endNode: Type.String(),
-	endOffset: Type.Number(),
-	isFlagged: Type.Boolean(),
-	isStickyNote: Type.Boolean(),
-	lastUpdatedBy: Type.String(),
-	nodeId: Type.String(),
-	startNode: Type.String(),
-	startOffset: Type.Number(),
-	tags: Type.Array(Type.String()),
-	text: Type.String(),
-	updatedAt: Type.String({ format: "date-time" }),
-	xpathContainer: Type.String(),
+	_id: Type.Optional(Type.String()),
+	annotation: Type.Optional(Type.Array(Annotation)),
+	bookmarkId: Type.Optional(Type.String()),
+	color: Type.Optional(Type.String()),
+	createdAt: Type.Optional(Type.String({ format: "date-time" })),
+	creator: Type.Optional(Type.String()),
+	endNode: Type.Optional(Type.String()),
+	endOffset: Type.Optional(Type.Number()),
+	isFlagged: Type.Optional(Type.Boolean()),
+	isStickyNote: Type.Optional(Type.Boolean()),
+	lastUpdatedBy: Type.Optional(Type.String()),
+	nodeId: Type.Optional(Type.String()),
+	startNode: Type.Optional(Type.String()),
+	startOffset: Type.Optional(Type.Number()),
+	tags: Type.Optional(Type.Array(Type.String())),
+	text: Type.Optional(Type.String()),
+	updatedAt: Type.Optional(Type.String({ format: "date-time" })),
+	xpathContainer: Type.Optional(Type.String()),
 });
+
+export const UpdateHighlightSchema = Type.Partial(HighlightSchema);
+
+export type Highlight = Static<typeof HighlightSchema>;

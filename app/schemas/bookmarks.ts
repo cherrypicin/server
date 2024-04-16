@@ -74,3 +74,7 @@ export const BookmarkSchema = Type.Object({
 	userId: Type.String(),
 	words: Type.Optional(Type.Number()),
 });
+
+export type Bookmark = Static<typeof BookmarkSchema>;
+
+export const UpdateBookmarkSchema = Type.Partial(BookmarkSchema);
