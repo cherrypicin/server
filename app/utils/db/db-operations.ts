@@ -93,10 +93,48 @@ const getDocs = async (params: DBOperationParams) => {
 	};
 };
 
+const updateDocs = async (params: DBOperationParams) => {
+	const { mongoDBCollection, data, options, _ids, userId } = params;
+
+	const result = await mongoDBCollection.updateMany(
+		//@ts-ignore
+		{ _id: { $in: _ids }, userId: userId },
+		data
+		// options
+	);
+	return result;
+};
+
+const deleteDocs = async (params: DBOperationParams) => {
+	const { mongoDBCollection, data, options, _ids, userId } = params;
+
+	const result = await mongoDBCollection.deleteMany(
+		//@ts-ignore
+		{ _id: { $in: _ids }, userId: userId },
+		data
+		// options
+	);
+	return result;
+};
+
+const createDoc = async (params: DBOperationParams) => {
+	const { mongoDBCollection, data, userId } = params;
+
+	const result = await mongoDBCollection.insertOne({
+		...data,
+		userId,
+	});
+
+	return result;
+};
+
 const dbOperations = {
 	"get-all-collections": getCollections,
 	"get-all-tags": getTags,
 	get: getDocs,
+	update: updateDocs,
+	delete: deleteDocs,
+	create: createDoc,
 };
 
 export const handleDBOperation = async (params: HandleDBOperationParams) => {

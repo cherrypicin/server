@@ -77,6 +77,7 @@ export interface HandleDBOperationParams extends HandleOperationParams {
 	sort?: any;
 	page?: number;
 	limit?: number;
+	options?: any;
 }
 
 export interface DBOperationParams extends HandleDBOperationParams {

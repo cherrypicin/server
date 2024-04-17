@@ -2,11 +2,13 @@ import Ajv from "npm:ajv";
 import addFormats from "npm:ajv-formats";
 
 import { getModelMapping } from "@models";
+
 import {
 	ValidationError,
 	getCollection,
 	stepLogger,
 	handleRedisDBOperation,
+	handleDBOperation,
 } from "@utils";
 
 import {
@@ -14,7 +16,6 @@ import {
 	HandlerFunctionParams,
 	HandleMutateParams,
 } from "./types.ts";
-import { handleDenoKVOperation } from "@utils";
 
 export const handleMutate = async (params: HandlerFunctionParams) => {
 	const { requestData, context } = params;
@@ -57,8 +58,6 @@ const manageSync = async ({
 	operation: string;
 	userId: string;
 }) => {
-	// const syncId = 1;
-
 	stepLogger({
 		step: "manageSync",
 		params: {
@@ -66,22 +65,6 @@ const manageSync = async ({
 			collection,
 		},
 	});
-
-	// const _syncId = await handleDenoKVOperation({
-	// 	operation: "get",
-	// 	key: [userId, "syncId"],
-	// 	value: JSON.stringify(1),
-	// 	data,
-	// 	prefix: [],
-	// });
-
-	// console.log("syncId", _syncId);
-
-	// const syncIdInDB = _syncId.value ? Number(_syncId.value) + 1 : 0;
-
-	// console.log("syncIdInDB", syncIdInDB);
-
-	//syncIdInDB to be random number between 1000 and 1100
 
 	const syncIdInDB = Math.floor(Math.random() * 100) + 1000;
 
@@ -95,22 +78,6 @@ const manageSync = async ({
 		syncId: syncIdInDB,
 	};
 
-	// await handleDenoKVOperation({
-	// 	operation: "create",
-	// 	key: [userId, "syncDB", JSON.stringify(syncIdInDB)],
-	// 	value: JSON.stringify(syncPacket),
-	// 	data: syncPacket,
-	// 	prefix: [],
-	// });
-
-	// await handleDenoKVOperation({
-	// 	operation: "create",
-	// 	key: [userId, "syncId"],
-	// 	value: JSON.stringify(syncIdInDB),
-	// 	data: syncPacket,
-	// 	prefix: [],
-	// });
-
 	// @ts-ignore
 	await handleRedisDBOperation({
 		collection: "syncDB",
@@ -121,7 +88,7 @@ const manageSync = async ({
 };
 
 const handleCreate = async (params: HandleMutateParams) => {
-	const { collection, data, hooks, schema } = params;
+	const { collection, data, hooks, schema, userId } = params;
 
 	stepLogger({ step: "handleCreate", params });
 
@@ -131,8 +98,12 @@ const handleCreate = async (params: HandleMutateParams) => {
 		await hooks.pre(params);
 	}
 
-	const _collection = await getCollection(collection);
-	const result = await _collection.insertOne(data);
+	const result = await handleDBOperation({
+		operation: "create",
+		collection,
+		data,
+		userId,
+	});
 
 	if (hooks && hooks.post) {
 		await hooks.post(params);
@@ -144,37 +115,13 @@ const handleCreate = async (params: HandleMutateParams) => {
 	};
 };
 
-const handleUpdate = async (params: HandleMutateParams) => {
-	const { collection, data, hooks, schema, arrayOperation, userId } = params;
-
-	stepLogger({
-		step: "handleUpdate",
-		params,
-	});
-
-	await validateBody({ data, schema });
-
-	const _collection = await getCollection(collection);
-
+const convertToMongoDBUpdate = (params: any) => {
+	const { data, arrayOperation } = params;
 	const { _id, ...rest } = data;
 
-	let _ids = _id.split(",");
-	// let dataInDbBeforeMutation = [];
-
-	if (hooks && hooks.pre) {
-		// const { updatedIds, currentData } = await hooks.pre({
-		// 	data,
-		// 	collection,
-		// 	_ids,
-		// 	userId,
-		// });
-		// _ids = updatedIds;
-		// dataInDbBeforeMutation = currentData;
-	}
-
 	let updateDoc = { $set: {}, $addToSet: {}, $pull: {} };
-	//@ts-ignore
-	let arrayFilterIdentifiers = [];
+
+	let arrayFilterIdentifiers = [] as any;
 
 	Object.entries(rest).forEach(([key, value]) => {
 		if (
@@ -260,35 +207,61 @@ const handleUpdate = async (params: HandleMutateParams) => {
 		}
 	});
 
-	// Clean up unused operators
 	["$addToSet", "$pull", "$set"].forEach((op) => {
 		//@ts-ignore
 		if (Object.keys(updateDoc[op]).length === 0) delete updateDoc[op];
 	});
 
-	console.log("handleUpdate-updateDoc", JSON.stringify(updateDoc, null, 2));
+	return {
+		_id,
+		updateDoc,
+		arrayFilterIdentifiers,
+	};
+};
+
+const handleUpdate = async (params: HandleMutateParams) => {
+	const { collection, data, hooks, schema, arrayOperation, userId } = params;
+
+	stepLogger({
+		step: "handleUpdate",
+		params,
+	});
+
+	await validateBody({ data, schema });
+
+	const { _id, ...rest } = data;
+
+	let _ids = _id.split(",");
+
+	if (hooks && hooks.pre) {
+	}
+
+	const { updateDoc, arrayFilterIdentifiers } = convertToMongoDBUpdate({
+		data,
+		arrayOperation,
+	});
+
+	console.log("updateDoc", JSON.stringify(updateDoc, null, 2));
 
 	let result;
-	// Perform the update
-	if (arrayFilterIdentifiers.length === 0) {
-		result = await _collection.updateMany(
-			{ _id: { $in: _ids }, userId: "12347" },
-			updateDoc
-		);
-	} else {
-		result = await _collection.updateMany({ _id: { $in: _ids } }, updateDoc, {
+
+	result = await handleDBOperation({
+		operation: "update",
+		collection,
+		data: updateDoc,
+		_ids,
+		userId,
+		options: {
 			// @ts-ignore
 			arrayFilters: arrayFilterIdentifiers,
-			explain: true,
-		});
-	}
+		},
+	});
 
 	if (hooks && hooks.post) {
 		await hooks.post({
 			data: rest,
 			_ids: _ids,
 			arrayOperation,
-			// dataInDbBeforeMutation,
 		});
 	}
 
@@ -296,18 +269,23 @@ const handleUpdate = async (params: HandleMutateParams) => {
 };
 
 const handleDelete = async (params: HandleMutateParams) => {
-	const { collection, data, hooks } = params;
+	const { collection, data, hooks, userId } = params;
 
 	stepLogger({ step: "handleDelete", params });
 
-	const _collection = await getCollection(collection);
 	const _ids = data._id.split(",");
 
 	if (hooks && hooks.pre) {
 		await hooks.pre({ data: data });
 	}
 
-	const result = await _collection.deleteMany({ _id: { $in: _ids } });
+	//@ts-ignore
+	const result = await handleDBOperation({
+		operation: "delete",
+		collection,
+		_ids,
+		userId,
+	});
 
 	if (hooks && hooks.post) {
 		await hooks.post({ data, _ids });
