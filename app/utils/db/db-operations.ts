@@ -7,6 +7,10 @@ import { getCollection } from "./get-collection.ts";
 
 const getCollections = async (params: DBOperationParams) => {
 	const { mongoDBCollection, userId } = params;
+	stepLogger({
+		step: "getCollections",
+		params: "",
+	});
 
 	const collections = await mongoDBCollection
 		.find({
@@ -20,7 +24,6 @@ const getCollections = async (params: DBOperationParams) => {
 		)
 	);
 
-	//remove sharedCollections from collections
 	sharedCollections.forEach((sharedCollection: any) => {
 		const index = collections.findIndex(
 			(collection: any) => collection._id === sharedCollection._id
@@ -39,10 +42,10 @@ const getCollections = async (params: DBOperationParams) => {
 const getTags = async (params: DBOperationParams) => {
 	const { mongoDBCollection, userId } = params;
 
-	// stepLogger({
-	// 	step: "getTags",
-	// 	params: JSON.stringify(params, null, 2),
-	// });
+	stepLogger({
+		step: "getTags",
+		params: "",
+	});
 
 	const data = await mongoDBCollection
 		.find({
