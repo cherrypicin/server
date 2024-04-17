@@ -2,7 +2,6 @@ import { getRepository } from "@connections";
 import { SyncDBError, stepLogger } from "@utils";
 import {
 	GetSyncPackets,
-	HandlePostUpdateParams,
 	HandleRedisDBOperationParams,
 	RedisDBOperationsParams,
 } from "../../factory/types.ts";

@@ -1,6 +1,7 @@
+import { pack } from "npm:msgpackr@1.10.1";
+
 import { handleRedisDBOperation } from "@utils";
 import { HandlerFunctionParams } from "./types.ts";
-import { pack } from "npm:msgpackr@1.10.1";
 
 export const handleDeltaSync = async ({
 	requestData,
