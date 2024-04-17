@@ -18,17 +18,22 @@ export const connectToRedis = withTryCatch(async () => {
 	const REDIS_HOST = env["REDIS_HOST"] as string;
 	const REDIS_PORT = parseInt(env["REDIS_PORT"] as string, 10);
 
-	const client = createClient({
-		password: REDIS_PASSWORD,
-		socket: {
-			host: REDIS_HOST,
-			port: REDIS_PORT,
-		},
-	});
+	try {
+		const client = createClient({
+			password: REDIS_PASSWORD,
+			socket: {
+				host: REDIS_HOST,
+				port: REDIS_PORT,
+				connectTimeout: 30000,
+			},
+		});
 
-	redisClient = client;
-	await client.connect();
-	console.log("Connected to Redis!");
+		redisClient = client;
+		await client.connect();
+		console.log("Connected to Redis!");
 
-	return client;
+		return client;
+	} catch (error) {
+		console.error("Failed to connect to Redis", error);
+	}
 }, "connection error - Failed to connect to Redis");

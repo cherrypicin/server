@@ -9,7 +9,6 @@ let db: any;
 export const connectToDatabase = withTryCatch(async () => {
 	if (!db) {
 		console.log("Connecting to database...");
-		console.log("DB_URL", env["DB_URL"]);
 		const DB_URL = env["DB_URL"] as string;
 
 		try {
@@ -23,5 +22,6 @@ export const connectToDatabase = withTryCatch(async () => {
 			console.log("error", err);
 		}
 	}
+	console.log("Reusing existing database connection...");
 	return db;
 }, "connection error - Failed to connect to database");

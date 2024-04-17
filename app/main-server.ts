@@ -1,17 +1,11 @@
 import { Application, Router } from "oak";
 
-import {
-	connectToDatabase,
-	connectToRedis,
-	connectToDenoKV,
-	connectToDenoMongoDatabase,
-} from "@connections";
+import { connectToDatabase, connectToRedis } from "@connections";
 import { corsMiddleware, logNetwork } from "@utils";
 import { registerRoutes, routes } from "@routes";
 
 await connectToDatabase();
 await connectToRedis();
-await connectToDenoKV();
 
 const app = new Application();
 const router = new Router();
