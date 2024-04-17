@@ -57,21 +57,40 @@ const getTags = async (params: DBOperationParams) => {
 };
 
 const getDocs = async (params: DBOperationParams) => {
-	const { mongoDBCollection, _ids, userId, filter } = params;
+	const { mongoDBCollection, filter, sort, page, limit } = params;
 
-	console.log("mongoDBCollection", filter);
+	const pipeline = [
+		{
+			$match: filter,
+		},
+		{
+			$sort: sort,
+		},
+		{
+			$facet: {
+				metadata: [{ $count: "total" }],
+				//@ts-ignore
+				data: [{ $skip: (page - 1) * limit }, { $limit: limit }],
+			},
+		},
+	];
 
-	// if (!_ids || _ids.length === 0) {
-	// 	return [];
-	// } else {
-	const data = await mongoDBCollection
-		.find({
-			...filter,
-		})
-		.toArray();
+	const result = await mongoDBCollection.aggregate(pipeline).toArray();
 
-	return data;
-	// }
+	const totalCount =
+		result[0].metadata.length > 0 ? result[0].metadata[0].total : 0;
+	//@ts-ignore
+	const totalPages = Math.ceil(totalCount / limit);
+
+	return {
+		data: result[0].data,
+		pagination: {
+			currentPage: page,
+			totalPages: totalPages,
+			totalCount: totalCount,
+			limit: limit,
+		},
+	};
 };
 
 const dbOperations = {

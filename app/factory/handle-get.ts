@@ -1,9 +1,9 @@
 import { handleDBOperation, stepLogger } from "@utils";
 import { HandlerFunctionParams } from "./types.ts";
 import { getModelMapping } from "../models/get-model-mapping.ts";
-import { isGlob } from "https://deno.land/std@0.217.0/path/is_glob.ts";
 
 //@ts-ignore
+//@SagarMahadik : CP-132
 function convertToMongoDBQuery(queryObject) {
 	let query = {} as { [key: string]: any };
 	let sort = {};
@@ -90,24 +90,9 @@ export const handleGet = async (params: HandlerFunctionParams) => {
 
 	const { body, userId } = requestData;
 
-	const { collection, _id, queryObject } = body;
+	const { collection, queryObject } = body;
 
-	// console.log("collection", collection);
-	// console.log("_id", _id);
-	console.log("queryObject", queryObject);
-
-	// if (collection !== "bookmarks" || collection !== "highlights") {
-	// 	//NOTE: get docs by ids for these collections is an internal operation
-	// 	throw new Error("Unauthorized access");
-	// }
 	const query = convertToMongoDBQuery(queryObject);
-	console.log("query", query);
-
-	let _ids;
-
-	if (_id) {
-		_ids = _id.split(",");
-	}
 
 	let filter;
 
@@ -118,7 +103,6 @@ export const handleGet = async (params: HandlerFunctionParams) => {
 	if (pre) {
 		const preHookResult = await pre({
 			userId,
-			_ids,
 		});
 
 		if (preHookResult.filter) {
@@ -144,8 +128,10 @@ export const handleGet = async (params: HandlerFunctionParams) => {
 		collection,
 		operation: "get",
 		userId,
-		_ids,
 		filter,
+		sort: query.sort,
+		page: queryObject.page || 1,
+		limit: queryObject.limit || 10,
 	});
 
 	if (post) {

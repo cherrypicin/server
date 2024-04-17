@@ -1,13 +1,9 @@
-import { HandleOperationParams } from "../../factory/types.ts";
 import { stepLogger } from "../../utils/server/index.ts";
 import { HooksParams } from "../types.ts";
 
 export const preBookmarkGetFilter = async (params: HooksParams) => {
 	const { userId } = params;
 
-	// const filter = {
-	// 	$or: [{ userId }, { "sharedWith.userId": userId }],
-	// };
 	const filter = { userId };
 
 	return { filter };

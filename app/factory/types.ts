@@ -74,6 +74,9 @@ export interface GetSyncPackets extends RedisDBOperationsParams {
 export interface HandleDBOperationParams extends HandleOperationParams {
 	_ids?: string[];
 	filter?: any;
+	sort?: any;
+	page?: number;
+	limit?: number;
 }
 
 export interface DBOperationParams extends HandleDBOperationParams {
