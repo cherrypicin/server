@@ -1,7 +1,9 @@
 import { getRepository } from "@connections";
 import { SyncDBError, stepLogger } from "@utils";
 import {
+	GetSyncPackets,
 	HandlePostUpdateParams,
+	HandleRedisDBOperationParams,
 	RedisDBOperationsParams,
 } from "../../factory/types.ts";
 
@@ -201,69 +203,23 @@ export const getFromRepository = async (params: RedisDBOperationsParams) => {
 	return data;
 };
 
-export const getAllCollections = async (params: RedisDBOperationsParams) => {
-	const { repository, userId } = params;
+export const getSyncPackets = async (params: GetSyncPackets) => {
+	const { repository, fromSyncId, toSyncId } = params;
 
 	stepLogger({
-		step: "getAllCollections",
+		step: "getSyncPackets",
 		params,
 	});
 
-	if (!userId) {
-		throw new Error("User ID not found");
-	}
-
-	try {
-		const collections = await repository
-			.search()
-			.where("userId")
-			.eq(userId)
-			.or("sharedWith_userId")
-			.contains(userId)
-			.return.all();
-
-		const sharedCollections = collections.filter((collection: any) =>
-			collection.sharedWith?.some(
-				(sharedWith: any) => sharedWith.userId === userId
-			)
-		);
-
-		//remove sharedCollections from collections
-		sharedCollections.forEach((sharedCollection: any) => {
-			const index = collections.findIndex(
-				(collection: any) => collection._id === sharedCollection._id
-			);
-			if (index !== -1) {
-				collections.splice(index, 1);
-			}
-		});
-
-		return { _collections: collections, _sharedCollections: sharedCollections };
-	} catch (err) {
-		console.log("getAllCollections", err);
-		throw new SyncDBError("Sync DB Error", err);
-	}
-};
-
-export const getAllTags = async (params: RedisDBOperationsParams) => {
-	const { repository, userId } = params;
-
-	stepLogger({
-		step: "getAllTags",
-		params,
-	});
-
-	if (!userId) {
-		throw new Error("User ID not found");
-	}
-
-	const tags = await repository
+	const entities = await repository
 		.search()
 		.where("userId")
-		.eq(userId)
+		.eq(12347)
+		.where("syncId")
+		.between(fromSyncId, toSyncId)
 		.return.all();
 
-	return tags;
+	return entities;
 };
 
 const redisDBOperations = {
@@ -271,12 +227,11 @@ const redisDBOperations = {
 	delete: deleteFromRepository,
 	update: updateInRepository,
 	get: getFromRepository,
-	"get-all-collections": getAllCollections,
-	"get-all-tags": getAllTags,
+	get_sync_packets: getSyncPackets,
 };
 
 export const handleRedisDBOperation = async (
-	params: HandlePostUpdateParams
+	params: HandleRedisDBOperationParams
 ) => {
 	const { operation, collection } = params;
 

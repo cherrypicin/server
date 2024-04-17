@@ -3,18 +3,18 @@ import { Context } from "oak";
 
 import { ValidationError, getRequestData, stepLogger } from "@utils";
 
-import { handleMutate } from "./handle-mutate.ts";
-import { handleDeltaSync } from "./handle-delta-sync.ts";
 import { ActionHandlers } from "./types.ts";
-import { handleGet } from "./handle-get.ts";
+import { handleDeltaSync } from "./handle-delta-sync.ts";
 import { handleFullBootstrap } from "./handle-full-bootstrap.ts";
+import { handleGet } from "./handle-get.ts";
+import { handleMutate } from "./handle-mutate.ts";
 import { handleSearch } from "./handle-search.ts";
 
 const actionHandlers: ActionHandlers = {
-	mutate: handleMutate,
 	"delta-sync": handleDeltaSync,
 	"full-bootstrap": handleFullBootstrap,
 	get: handleGet,
+	mutate: handleMutate,
 	search: handleSearch,
 };
 
@@ -22,9 +22,10 @@ export function endPointHandler(action: any) {
 	return async (context: Context) => {
 		const requestData = await getRequestData(context);
 		const handler = actionHandlers[action];
+
 		if (!handler) {
 			context.response.status = 404;
-			context.response.body = "Not found";
+			context.response.body = "Route Not found";
 			return;
 		}
 		try {

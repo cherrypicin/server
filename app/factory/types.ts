@@ -57,8 +57,18 @@ export interface HandlePostUpdateParams extends HandleOperationParams {
 	dataInDbBeforeMutation: any;
 }
 
+export interface HandleRedisDBOperationParams extends HandlePostUpdateParams {
+	fromSyncId?: number;
+	toSyncId?: number;
+}
+
 export interface RedisDBOperationsParams extends HandlePostUpdateParams {
 	repository: Repository;
+}
+
+export interface GetSyncPackets extends RedisDBOperationsParams {
+	fromSyncId: number;
+	toSyncId: number;
 }
 
 export interface HandleDBOperationParams extends HandleOperationParams {
