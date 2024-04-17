@@ -14,8 +14,8 @@ export function withTryCatch<T, Args extends any[]>(
 		} catch (err) {
 			if (env["ENV"] === "dev") {
 				console.error(errorMessage);
-				console.log("stack", err.stack);
 			} else {
+				console.log("stack", err.stack);
 				logError({
 					errorMessage,
 					errorStack: err.stack,

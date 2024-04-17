@@ -7,9 +7,7 @@ export const connectToDenoKV = async () => {
 	}
 
 	try {
-		kv = await Deno.openKv(
-			"https://api.deno.com/databases/7fce3ef5-79d6-4e46-a482-d437cae179e7/connect"
-		);
+		kv = await Deno.openKv();
 
 		console.log("Connected to Deno KV");
 	} catch (error) {

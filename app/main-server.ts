@@ -10,6 +10,7 @@ import { corsMiddleware, logNetwork } from "@utils";
 import { registerRoutes, routes } from "@routes";
 
 await connectToDatabase();
+await connectToRedis();
 await connectToDenoKV();
 
 const app = new Application();

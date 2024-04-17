@@ -2,7 +2,12 @@ import Ajv from "npm:ajv";
 import addFormats from "npm:ajv-formats";
 
 import { getModelMapping } from "@models";
-import { ValidationError, getCollection, stepLogger } from "@utils";
+import {
+	ValidationError,
+	getCollection,
+	stepLogger,
+	handleRedisDBOperation,
+} from "@utils";
 
 import {
 	HandleOperationParams,
@@ -52,7 +57,15 @@ const manageSync = async ({
 	operation: string;
 	userId: string;
 }) => {
-	const syncId = 1;
+	// const syncId = 1;
+
+	stepLogger({
+		step: "manageSync",
+		params: {
+			data,
+			collection,
+		},
+	});
 
 	// const _syncId = await handleDenoKVOperation({
 	// 	operation: "get",
@@ -64,9 +77,13 @@ const manageSync = async ({
 
 	// console.log("syncId", _syncId);
 
-	// const syncIdInDB = _syncId ? Number(_syncId.value) + 1 : 0;
+	// const syncIdInDB = _syncId.value ? Number(_syncId.value) + 1 : 0;
 
 	// console.log("syncIdInDB", syncIdInDB);
+
+	//syncIdInDB to be random number between 1000 and 1100
+
+	const syncIdInDB = Math.floor(Math.random() * 100) + 1000;
 
 	let syncPacket = {
 		_id: crypto.randomUUID(),
@@ -75,32 +92,32 @@ const manageSync = async ({
 		operation,
 		userId,
 		updatedAt: new Date(),
-		syncId: 1,
+		syncId: syncIdInDB,
 	};
-
-	await handleDenoKVOperation({
-		operation: "create",
-		key: [userId, "syncDB", JSON.stringify(1)],
-		value: JSON.stringify(syncPacket),
-		data: syncPacket,
-		prefix: [],
-	});
 
 	// await handleDenoKVOperation({
 	// 	operation: "create",
-	// 	key: [userId, "syncId"],
-	// 	value: JSON.stringify(1),
+	// 	key: [userId, "syncDB", JSON.stringify(syncIdInDB)],
+	// 	value: JSON.stringify(syncPacket),
 	// 	data: syncPacket,
 	// 	prefix: [],
 	// });
 
-	//@ts-ignore
-	// await handleRedisDBOperation({
-	// 	collection: "syncDB",
+	// await handleDenoKVOperation({
 	// 	operation: "create",
+	// 	key: [userId, "syncId"],
+	// 	value: JSON.stringify(syncIdInDB),
 	// 	data: syncPacket,
-	// 	userId: "12347",
+	// 	prefix: [],
 	// });
+
+	// @ts-ignore
+	await handleRedisDBOperation({
+		collection: "syncDB",
+		operation: "create",
+		data: syncPacket,
+		userId: "12347",
+	});
 };
 
 const handleCreate = async (params: HandleMutateParams) => {

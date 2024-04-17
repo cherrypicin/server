@@ -1,0 +1,29 @@
+# fly.toml app configuration file generated for cherrypic-in-uat-api on 2024-04-16T16:30:42+05:30
+#
+# See https://fly.io/docs/reference/configuration/ for information about how to use this file.
+#
+
+app = 'cherrypic-in-uat-api'
+primary_region = 'sjc'
+
+[build]
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = true
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ['app']
+
+[[vm]]
+  memory = '512mb'
+  cpu_kind = 'shared'
+  cpus = 1
+
+[env]
+  DENO_KV_SQLITE_PATH="/data/denokv.sqllite3"
+
+[mounts]
+  destination = "/data"
+  source = "denokv_data"
