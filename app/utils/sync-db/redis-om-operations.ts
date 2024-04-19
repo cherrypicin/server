@@ -8,7 +8,7 @@ import {
 import { getRepository } from "../../connections/sync-db.ts";
 
 export const saveToRepository = async (params: RedisDBOperationsParams) => {
-	const { repository, data } = params;
+	const { repository, data, ttl } = params;
 
 	stepLogger({
 		step: "saveToRepository",
@@ -21,6 +21,9 @@ export const saveToRepository = async (params: RedisDBOperationsParams) => {
 
 	try {
 		await repository.save(data._id, data);
+		if (ttl) {
+			await repository.expire(data._id, ttl);
+		}
 	} catch (err) {
 		console.log(err);
 		throw new SyncDBError("Sync DB Error", err);

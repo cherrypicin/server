@@ -76,7 +76,7 @@ const manageSync = async ({
 
 	// @ts-ignore
 	await handleRedisDBOperation({
-		collection: "syncDB",
+		collection: "sync",
 		operation: "create",
 		data: syncPacket,
 		userId: "12347",

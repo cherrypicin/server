@@ -1,6 +1,19 @@
 import * as djwt from "djwt";
 import { load } from "dotenv";
 import CryptoJS from "npm:crypto-js@4.2.0";
+import { Type } from "typebox";
+import { HandlerFunctionParams } from "./types.ts";
+import {
+	generateVerificationToken,
+	handleDBOperation,
+	handleRedisDBOperation,
+	stepLogger,
+	validateBody,
+} from "@utils";
+
+import { handleCacheOperation } from "../utils/cache/index.ts";
+
+const env = await load();
 
 function encrypt({ text, key }: { text: string; key: string }) {
 	return CryptoJS.AES.encrypt(text, key).toString();
@@ -11,19 +24,6 @@ function decrypt({ ciphertext, key }: { ciphertext: string; key: string }) {
 	console.log("bytes", bytes);
 	return bytes.toString(CryptoJS.enc.Utf8);
 }
-
-import { Type } from "typebox";
-import { HandlerFunctionParams } from "./types.ts";
-import {
-	generateVerificationToken,
-	handleDBOperation,
-	stepLogger,
-	validateBody,
-} from "@utils";
-
-import { handleCacheOperation } from "../utils/cache/index.ts";
-
-const env = await load();
 
 const loginBodySchema = Type.Object({
 	email: Type.String({ format: "email" }),
@@ -82,14 +82,13 @@ const generateSession = async (params: any) => {
 		token,
 		deviceDetails,
 	};
-	const sessionKey = `${userId}-session-${sessionId}`;
-	const sessionData = JSON.stringify(session);
+	const sessionKey = `${sessionId}`;
 
 	//@ts-ignore
-	const setInCache = await handleCacheOperation({
-		operation: "set",
-		key: sessionKey,
-		data: sessionData,
+	await handleRedisDBOperation({
+		operation: "create",
+		collection: "session",
+		data: session,
 		ttl: 60 * 60 * 24 * 30 * 12,
 	});
 
@@ -135,7 +134,7 @@ const intiateEmailBasedLogin = async (params: any) => {
 	const setInCache = await handleCacheOperation({
 		operation: "set",
 		key: `${verificationToken}-${data.email}`,
-		data: JSON.stringify(data),
+		data,
 		ttl: 60,
 	});
 
@@ -145,10 +144,12 @@ const intiateEmailBasedLogin = async (params: any) => {
 };
 
 const verifyUserAndHandleSession = async (params: any) => {
+	console.log("verifyUserAndHandleSession", params);
 	const { email } = params;
+
 	//@ts-ignore
 	const result = await checkIfUserExists({
-		data: JSON.parse(email),
+		data: { email },
 	});
 
 	let jwt = null;
@@ -178,7 +179,7 @@ const verifyUserAndHandleSession = async (params: any) => {
 			email,
 			userId,
 			token: jwt,
-			deviceDetails: {},
+			deviceDetails: "deviceDetails",
 		},
 	});
 	return session;
@@ -205,8 +206,10 @@ const verifyEmailBasedLogin = async (params: any) => {
 		throw new Error("Invalid token");
 	}
 
+	const _storedData = JSON.parse(storedData);
+
 	const session = await verifyUserAndHandleSession({
-		email: storedData,
+		email: _storedData.email,
 	});
 
 	return session;
@@ -237,6 +240,7 @@ export const handleLogin = async (params: HandlerFunctionParams) => {
 	} catch (error) {
 		context.response.body = {
 			error: error.message,
+			stack: error.stack,
 		};
 		context.response.status = 500;
 	}

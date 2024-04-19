@@ -60,9 +60,10 @@ export interface HandlePostUpdateParams extends HandleOperationParams {
 export interface HandleRedisDBOperationParams extends HandlePostUpdateParams {
 	fromSyncId?: number;
 	toSyncId?: number;
+	ttl?: number;
 }
 
-export interface RedisDBOperationsParams extends HandlePostUpdateParams {
+export interface RedisDBOperationsParams extends HandleRedisDBOperationParams {
 	repository: Repository;
 }
 

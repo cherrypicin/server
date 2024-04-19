@@ -16,7 +16,7 @@ export const handleDeltaSync = async ({
 
 	//@ts-ignore
 	const entities = await handleRedisDBOperation({
-		collection: "syncDB",
+		collection: "sync",
 		fromSyncId,
 		toSyncId,
 		operation: "get_sync_packets",

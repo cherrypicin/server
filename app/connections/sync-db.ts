@@ -26,7 +26,7 @@ await redis.connect();
 
 console.log("Connected to Redis from sync db!");
 
-const syncDBSchema = new Schema("SyncDB", {
+const syncDBSchema = new Schema("Sync", {
 	data: { type: "string" },
 	collection: { type: "string" },
 	operation: { type: "string" },
@@ -35,10 +35,21 @@ const syncDBSchema = new Schema("SyncDB", {
 	syncId: { type: "number" },
 });
 
+const sessionSchema = new Schema("Session", {
+	userId: { type: "string" },
+	token: { type: "string" },
+	email: { type: "string" },
+	deviceDetails: { type: "string" },
+	_id: { type: "string" },
+	timeZone: { type: "string" },
+});
+
 const syncDBRepository = new Repository(syncDBSchema, redis);
+const sessionRepository = new Repository(sessionSchema, redis);
 
 try {
 	await syncDBRepository.createIndex();
+	await sessionRepository.createIndex();
 } catch (e) {
 	console.error(e);
 }
@@ -46,9 +57,10 @@ try {
 const getRepository = (collection: string) => {
 	stepLogger({ step: "getRepository", params: { collection } });
 	switch (collection) {
-		case "syncDB":
+		case "sync":
 			return syncDBRepository;
-
+		case "session":
+			return sessionRepository;
 		default:
 			throw new Error("Repository not found");
 	}
