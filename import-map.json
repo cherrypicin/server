@@ -6,6 +6,7 @@
 		"deno-mongodb": "https://deno.land/x/mongo@v0.31.1/mod.ts",
 		"oak": "https://deno.land/x/oak@v14.1.0/mod.ts",
 		"oak-cors": "https://deno.land/x/cors@v1.2.2/mod.ts",
+		"djwt": "https://deno.land/x/djwt@v3.0.0/mod.ts",
 		"redis-om": "npm:redis-om@0.4.3",
 		"typebox": "npm:@sinclair/typebox",
 		"@connections": "./app/connections/index.ts",
