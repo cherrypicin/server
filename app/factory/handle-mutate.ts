@@ -237,8 +237,6 @@ const handleUpdate = async (params: HandleMutateParams) => {
 		arrayOperation,
 	});
 
-	console.log("updateDoc", JSON.stringify(updateDoc, null, 2));
-
 	let result;
 
 	result = await handleDBOperation({

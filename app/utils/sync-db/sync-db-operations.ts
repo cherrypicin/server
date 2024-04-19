@@ -182,7 +182,6 @@ export const updateInRepository = async (
 		});
 
 		try {
-			console.log("Saving updated data", updatedData);
 			await repository.save(_id, updatedData);
 		} catch (err) {
 			console.error("Error in updateInRepository", err);
@@ -201,7 +200,6 @@ export const getFromRepository = async (params: RedisDBOperationsParams) => {
 	//@ts-ignore
 	const data = await Promise.all(_ids.map((_id) => repository.fetch(_id)));
 
-	console.log("getFromRepository", data);
 	return data;
 };
 
@@ -319,7 +317,6 @@ export const handleRedisDBOperation = async (
 
 		return result;
 	} catch (err) {
-		console.log("redis ops", err);
 		throw new SyncDBError("Sync DB Error", err);
 	}
 };

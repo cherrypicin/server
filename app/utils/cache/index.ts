@@ -3,7 +3,6 @@ import { redis } from "@connections";
 
 const setDataInCache = (params: HandleRedisCacheOperationParams) => {
 	const { key, data, ttl } = params;
-	console.log("setDataInCache", key, data, ttl);
 	return redis.set(key, JSON.stringify(data), {
 		EX: ttl,
 	});
