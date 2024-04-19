@@ -46,10 +46,10 @@ const getRequestData = async <T extends string>(
 	const searchParams = new URLSearchParams(search);
 	const ip = request.ip;
 	let body = null;
-	// if (request.hasBody) {
-	body = await request.body.json();
-	console.log("request body ", body);
-	// }
+	if (request.hasBody) {
+		body = await request.body.json();
+		console.log("request body ", body);
+	}
 
 	const searchParamsObject = {};
 	for (const [key, value] of searchParams) {

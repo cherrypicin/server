@@ -23,7 +23,7 @@ export const routes: Route[] = [
 		action: "session-management",
 		group: "auth",
 	},
-	{ method: "GET", path: "/login", action: "login", group: "auth" },
+	{ method: "POST", path: "/login", action: "login", group: "auth" },
 	{ method: "GET", path: "/callback", action: "callback", group: "auth" },
 	{ method: "GET", path: "/logout", action: "logout", group: "auth" },
 	{

@@ -9,6 +9,7 @@ import { handleFullBootstrap } from "./handle-full-bootstrap.ts";
 import { handleGet } from "./handle-get.ts";
 import { handleMutate } from "./handle-mutate.ts";
 import { handleSearch } from "./handle-search.ts";
+import { handleLogin } from "./handle-login.ts";
 
 const actionHandlers: ActionHandlers = {
 	"delta-sync": handleDeltaSync,
@@ -16,6 +17,7 @@ const actionHandlers: ActionHandlers = {
 	get: handleGet,
 	mutate: handleMutate,
 	search: handleSearch,
+	login: handleLogin,
 };
 
 export function endPointHandler(action: any) {

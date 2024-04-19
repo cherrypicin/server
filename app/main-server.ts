@@ -5,7 +5,7 @@ import { corsMiddleware, logNetwork } from "@utils";
 import { registerRoutes, routes } from "@routes";
 
 await connectToDatabase();
-await connectToRedis();
+// await connectToRedis();
 
 const app = new Application();
 const router = new Router();

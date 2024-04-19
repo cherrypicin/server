@@ -2,13 +2,13 @@ import { createClient } from "npm:redis@4.6.13";
 import { load } from "dotenv";
 
 import { withTryCatch } from "../utils/server/with-try-catch.ts";
+import { Repository } from "redis-om";
 
 const env = await load();
 
 let redisClient: any;
 export const connectToRedis = withTryCatch(async () => {
 	if (redisClient) {
-		console.log("Reusing existing Redis connection...");
 		return redisClient;
 	}
 
@@ -24,15 +24,19 @@ export const connectToRedis = withTryCatch(async () => {
 			socket: {
 				host: REDIS_HOST,
 				port: REDIS_PORT,
-				connectTimeout: 30000,
+				connectTimeout: 40000,
 			},
 		});
 
 		redisClient = client;
-		await client.connect();
-		console.log("Connected to Redis!");
+		try {
+			await client.connect();
+			console.log("Connected to Redis!");
 
-		return client;
+			return client;
+		} catch (error) {
+			console.error("Failed to connect to Redis", error);
+		}
 	} catch (error) {
 		console.error("Failed to connect to Redis", error);
 	}

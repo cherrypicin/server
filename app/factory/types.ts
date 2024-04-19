@@ -83,3 +83,9 @@ export interface HandleDBOperationParams extends HandleOperationParams {
 export interface DBOperationParams extends HandleDBOperationParams {
 	mongoDBCollection: Collection;
 }
+
+export interface HandleRedisCacheOperationParams extends HandleOperationParams {
+	key: string;
+	data: string;
+	ttl?: number;
+}

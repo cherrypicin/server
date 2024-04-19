@@ -1,10 +1,11 @@
-import { getRepository } from "@connections";
+// import { getRepository } from "@connections";
 import { SyncDBError, stepLogger } from "@utils";
 import {
 	GetSyncPackets,
 	HandleRedisDBOperationParams,
 	RedisDBOperationsParams,
 } from "../../factory/types.ts";
+import { getRepository } from "../../connections/sync-db.ts";
 
 export const saveToRepository = async (params: RedisDBOperationsParams) => {
 	const { repository, data } = params;

@@ -120,12 +120,23 @@ const deleteDocs = async (params: DBOperationParams) => {
 const createDoc = async (params: DBOperationParams) => {
 	const { mongoDBCollection, data, userId } = params;
 
-	const result = await mongoDBCollection.insertOne({
+	const dataToInsert = {
 		...data,
-		userId,
-	});
+		userId: userId ?? undefined,
+	};
+
+	userId === null && delete dataToInsert.userId;
+
+	const result = await mongoDBCollection.insertOne(dataToInsert);
 
 	return result;
+};
+
+const getDataByFilter = async (params: DBOperationParams) => {
+	const { mongoDBCollection, filter } = params;
+	const data = await mongoDBCollection.find(filter).toArray();
+
+	return data;
 };
 
 const dbOperations = {
@@ -135,6 +146,7 @@ const dbOperations = {
 	update: updateDocs,
 	delete: deleteDocs,
 	create: createDoc,
+	"get-data-by-filter": getDataByFilter,
 };
 
 export const handleDBOperation = async (params: HandleDBOperationParams) => {
