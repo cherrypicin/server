@@ -5,7 +5,9 @@ export const stepLogger = ({ step, params }: { step: string; params: any }) => {
 	console.log(
 		"--------------------------------------------------------------------------------------------------"
 	);
-	console.log(` ${magenta(step)} - ${cyan(JSON.stringify(params))}`);
+	// console.log(` ${magenta(step)} - ${cyan(JSON.stringify(params))}`);
+	console.log(` ${magenta(step)}`);
+	console.log(params);
 	console.log(
 		"--------------------------------------------------------------------------------------------------"
 	);

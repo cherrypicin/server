@@ -2,11 +2,11 @@ import { createClient } from "npm:redis@4.6.13";
 import { load } from "dotenv";
 
 import { withTryCatch } from "../utils/server/with-try-catch.ts";
-import { Repository } from "redis-om";
 
 const env = await load();
 
 let redisClient: any;
+
 export const connectToRedis = withTryCatch(async () => {
 	if (redisClient) {
 		return redisClient;

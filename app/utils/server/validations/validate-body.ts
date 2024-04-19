@@ -1,7 +1,7 @@
 import Ajv from "npm:ajv";
 import addFormats from "npm:ajv-formats";
 
-import { ValidationError } from "../errors/validation-errors.ts";
+import { ValidationError } from "@utils";
 import { stepLogger } from "../logging/step-logger.ts";
 
 function convertToDatesUsingSchema(params: { data: any; schema: any }) {

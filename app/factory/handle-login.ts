@@ -1,9 +1,11 @@
 import * as djwt from "djwt";
 import { load } from "dotenv";
-import CryptoJS from "npm:crypto-js@4.2.0";
+
 import { Type } from "typebox";
 import { HandlerFunctionParams } from "./types.ts";
 import {
+	encrypt,
+	generateJWT,
 	generateVerificationToken,
 	handleDBOperation,
 	handleRedisDBOperation,
@@ -15,16 +17,6 @@ import { handleCacheOperation } from "../utils/cache/index.ts";
 
 const env = await load();
 
-function encrypt({ text, key }: { text: string; key: string }) {
-	return CryptoJS.AES.encrypt(text, key).toString();
-}
-
-function decrypt({ ciphertext, key }: { ciphertext: string; key: string }) {
-	const bytes = CryptoJS.AES.decrypt(ciphertext, key);
-	console.log("bytes", bytes);
-	return bytes.toString(CryptoJS.enc.Utf8);
-}
-
 const loginBodySchema = Type.Object({
 	email: Type.String({ format: "email" }),
 	clientAuthCode: Type.String(),
@@ -34,37 +26,6 @@ const verifyEmailBasedLoginBodySchema = Type.Object({
 	email: Type.String({ format: "email" }),
 	token: Type.String(),
 });
-
-async function generateCryptoKey(secret: string): Promise<CryptoKey> {
-	const keyData = new TextEncoder().encode(secret);
-	const key = await crypto.subtle.importKey(
-		"raw", // format
-		keyData, // keyData
-		{ name: "HMAC", hash: { name: "SHA-256" } }, // algorithm details
-		false, // not extractable
-		["sign", "verify"] // usages
-	);
-	return key;
-}
-
-const generateJWT = async (params: any) => {
-	stepLogger({
-		step: "generateJWT",
-		params,
-	});
-
-	const { data } = params;
-	const { email, userId } = data;
-	const payload = {
-		email,
-		userId,
-	};
-	const key = env["AUTH_JWT_SECRET"];
-	const cryptoKey = await generateCryptoKey(key);
-	const jwt = djwt.create({ alg: "HS256", typ: "JWT" }, payload, cryptoKey);
-
-	return jwt;
-};
 
 const generateSession = async (params: any) => {
 	stepLogger({

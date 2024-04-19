@@ -11,6 +11,7 @@ export interface RequestData {
 	request: Request;
 	search: string;
 	searchParams?: { [key: string]: string };
+	session?: string;
 	userAgent?: string;
 	userId: string;
 }
@@ -29,6 +30,14 @@ const parseCookies = (header: string | null) => {
 	return cookies;
 };
 
+const getSession = (params: { cookies: { [key: string]: string } }) => {
+	const { cookies } = params;
+	const session = cookies.session;
+	if (session) {
+		return session;
+	}
+};
+
 const getRequestData = async <T extends string>(
 	context: RouterContext<T, RouteParams<T>>
 ): Promise<RequestData> => {
@@ -37,14 +46,18 @@ const getRequestData = async <T extends string>(
 	const { headers, method, url } = request;
 	const { pathname, search } = url;
 
-	const contentType = headers.get("content-type");
 	const appSource = headers.get("x-app-source");
+	const contentType = headers.get("content-type");
 	const authorization = headers.get("authorization");
 	const userAgent = headers.get("user-agent");
 	const cookies = parseCookies(headers.get("Cookie"));
 
 	const searchParams = new URLSearchParams(search);
+
+	const session = getSession({ cookies });
+
 	const ip = request.ip;
+
 	let body = null;
 	if (request.hasBody) {
 		body = await request.body.json();
@@ -70,8 +83,9 @@ const getRequestData = async <T extends string>(
 		request,
 		search,
 		searchParams: searchParamsObject,
+		session,
 		userAgent,
-		userId: "12347",
+		userId: "",
 	};
 
 	return Object.freeze(requestData) as RequestData;
