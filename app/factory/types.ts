@@ -45,6 +45,7 @@ export type HandleOperationParams = {
 	data: any;
 	operation: string;
 	userId?: string;
+	currentSessionId?: any;
 };
 
 export interface HandleMutateParams extends HandleOperationParams {

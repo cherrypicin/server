@@ -20,6 +20,7 @@ import { handleGet } from "./handle-get.ts";
 import { handleMutate } from "./handle-mutate.ts";
 import { handleSearch } from "./handle-search.ts";
 import { handleLogin } from "./handle-login.ts";
+import { handleSessionManagement } from "./handle-session-management.ts";
 
 const env = await load();
 
@@ -30,6 +31,7 @@ const actionHandlers: ActionHandlers = {
 	mutate: handleMutate,
 	search: handleSearch,
 	login: handleLogin,
+	"session-management": handleSessionManagement,
 };
 
 const authNotRequired = ["login"];
@@ -44,7 +46,7 @@ const verifySession = async (params: { session: string }) => {
 	const { session } = params;
 
 	if (!session) {
-		throw new AuthError("UnAuthorized");
+		throw new AuthError("UnAuthorized - no session error");
 	}
 
 	const _sessionData = await handleRedisDBOperation({
@@ -54,15 +56,19 @@ const verifySession = async (params: { session: string }) => {
 	});
 
 	if (!_sessionData || !_sessionData[0]) {
-		throw new AuthError("UnAuthorized");
+		throw new AuthError("UnAuthorized - logged out session error");
 	}
 
-	const { token } = _sessionData[0];
+	const { token, _id } = _sessionData[0];
 
-	const decodedToken = await verifyJWT({ data: { token } });
-	const { email, userId } = decodedToken;
+	try {
+		const decodedToken = await verifyJWT({ data: { token } });
+		const { email, userId } = decodedToken;
 
-	return { email, userId };
+		return { email, userId, currentSessionId: _id };
+	} catch (err) {
+		throw new AuthError("UnAuthorized-JWT-session deleted error");
+	}
 };
 
 const handleAuth = async (params: { requestData: RequestData }) => {
@@ -80,11 +86,11 @@ const handleAuth = async (params: { requestData: RequestData }) => {
 		key: env["AUTH_SESSION_ENCRYPTION_KEY"],
 	});
 
-	const { email, userId } = await verifySession({
+	const { email, userId, currentSessionId } = await verifySession({
 		session: decryptedSessionId,
 	});
 
-	return { email, userId };
+	return { email, userId, currentSessionId };
 };
 
 export function endPointHandler(action: any) {
@@ -105,11 +111,15 @@ export function endPointHandler(action: any) {
 			});
 
 			if (isAuthRequired(action)) {
-				const { email, userId } = await handleAuth({ requestData });
+				const { email, userId, currentSessionId } = await handleAuth({
+					requestData,
+				});
+				console.log("currentSessionId", currentSessionId);
 				authenticatedRequestData = {
 					...requestData,
 					email,
 					userId,
+					currentSessionId,
 				};
 			}
 

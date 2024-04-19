@@ -1,1 +1,1 @@
-export * from "./redis-om-operations.ts";
+export * from "./sync-db-operations.ts";

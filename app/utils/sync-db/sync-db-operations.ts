@@ -1,4 +1,3 @@
-// import { getRepository } from "@connections";
 import { SyncDBError, stepLogger } from "@utils";
 import {
 	GetSyncPackets,
@@ -225,12 +224,75 @@ export const getSyncPackets = async (params: GetSyncPackets) => {
 	return entities;
 };
 
+const getAllSessions = async (params: RedisDBOperationsParams) => {
+	stepLogger({
+		step: "getUserSessions",
+		params,
+	});
+
+	const { repository, userId } = params;
+
+	if (!userId) {
+		throw new Error("User Id not found");
+	}
+
+	const sessions = await repository
+		.search()
+		.where("userId")
+		.eq(userId)
+		.return.all();
+	return sessions;
+};
+
+const logOutFromSession = async (params: RedisDBOperationsParams) => {
+	stepLogger({
+		step: "logOutFromSession",
+		params,
+	});
+
+	const { repository, data } = params;
+	const { _id } = data;
+
+	const sessionIds = _id.split(",");
+
+	sessionIds.forEach(async (sessionId: string) => {
+		await repository.remove(sessionId);
+	});
+
+	return "Session deleted";
+};
+
+const logOutFromAllOtherSessions = async (params: RedisDBOperationsParams) => {
+	const { repository, userId, currentSessionId } = params;
+
+	stepLogger({
+		step: "logOutFromAllOtherSessions",
+		params,
+	});
+	//@ts-ignore
+	const sessions = await getAllSessions({ repository, userId });
+	const sessionIds = sessions.map((session: any) => session._id);
+
+	const otherSessions = sessionIds.filter(
+		(sessionId: string) => sessionId !== currentSessionId
+	);
+
+	otherSessions.forEach(async (sessionId: string) => {
+		await repository.remove(sessionId);
+	});
+
+	return "Logged out from all other sessions";
+};
+
 const redisDBOperations = {
 	create: saveToRepository,
 	delete: deleteFromRepository,
 	update: updateInRepository,
 	get: getFromRepository,
-	get_sync_packets: getSyncPackets,
+	getSyncPackets,
+	getAllSessions,
+	logOutFromSession,
+	logOutFromAllOtherSessions,
 };
 
 export const handleRedisDBOperation = async (
@@ -245,7 +307,7 @@ export const handleRedisDBOperation = async (
 	// @ts-ignore
 	const operationHandler = redisDBOperations[operation];
 	if (!operationHandler) {
-		throw new Error("Invalid operation");
+		throw new Error("Invalid operation for redis db");
 	}
 	const repository = getRepository(collection);
 

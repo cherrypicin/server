@@ -19,7 +19,7 @@ export const handleDeltaSync = async ({
 		collection: "sync",
 		fromSyncId,
 		toSyncId,
-		operation: "get_sync_packets",
+		operation: "getSyncPackets",
 	});
 
 	//@ts-ignore
